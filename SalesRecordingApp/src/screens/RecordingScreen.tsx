@@ -1,0 +1,357 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  TextInput,
+  Modal,
+} from 'react-native';
+import { RecordingService } from '../services/RecordingService';
+import { StorageService } from '../services/StorageService';
+import { TranscriptionService } from '../services/TranscriptionService';
+import { Recording, RecordingStatus } from '../types';
+
+export const RecordingScreen: React.FC = () => {
+  const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>('idle');
+  const [recordTime, setRecordTime] = useState<number>(0);
+  const [recordingService] = useState(() => new RecordingService());
+  const [showTitleModal, setShowTitleModal] = useState(false);
+  const [recordingTitle, setRecordingTitle] = useState('');
+  const [recordingMemo, setRecordingMemo] = useState('');
+  const [currentRecordingPath, setCurrentRecordingPath] = useState<string>('');
+
+  const handleStartRecording = async () => {
+    try {
+      const path = await recordingService.startRecording((time) => {
+        setRecordTime(time);
+      });
+      setCurrentRecordingPath(path);
+      setRecordingStatus('recording');
+    } catch (error) {
+      Alert.alert('エラー', '録音を開始できませんでした');
+    }
+  };
+
+  const handleStopRecording = async () => {
+    try {
+      const result = await recordingService.stopRecording();
+      setRecordingStatus('stopped');
+      setShowTitleModal(true);
+    } catch (error) {
+      Alert.alert('エラー', '録音を停止できませんでした');
+    }
+  };
+
+  const handlePauseRecording = async () => {
+    try {
+      await recordingService.pauseRecording();
+      setRecordingStatus('paused');
+    } catch (error) {
+      Alert.alert('エラー', '録音を一時停止できませんでした');
+    }
+  };
+
+  const handleResumeRecording = async () => {
+    try {
+      await recordingService.resumeRecording();
+      setRecordingStatus('recording');
+    } catch (error) {
+      Alert.alert('エラー', '録音を再開できませんでした');
+    }
+  };
+
+  const handleSaveRecording = async () => {
+    try {
+      const recording: Recording = {
+        id: Date.now().toString(),
+        title: recordingTitle || `録音 ${new Date().toLocaleDateString()}`,
+        memo: recordingMemo,
+        filePath: currentRecordingPath,
+        duration: recordTime,
+        createdAt: new Date(),
+      };
+
+      await StorageService.saveRecording(recording);
+      
+      Alert.alert(
+        '録音を保存しました',
+        '文字起こしを開始しますか？',
+        [
+          { text: 'あとで', style: 'cancel' },
+          { 
+            text: '開始', 
+            onPress: () => handleTranscription(recording.id),
+          },
+        ]
+      );
+
+      resetRecording();
+    } catch (error) {
+      Alert.alert('エラー', '録音の保存に失敗しました');
+    }
+  };
+
+  const handleTranscription = async (recordingId: string) => {
+    try {
+      const recordings = await StorageService.getAllRecordings();
+      const recording = recordings.find(r => r.id === recordingId);
+      
+      if (!recording) return;
+
+      Alert.alert('文字起こし中', 'しばらくお待ちください...');
+      
+      const transcribedRecording = await TranscriptionService.processRecording(recording);
+      await StorageService.updateRecording(recordingId, {
+        transcription: transcribedRecording.transcription,
+        speakers: transcribedRecording.speakers,
+      });
+
+      Alert.alert('完了', '文字起こしが完了しました');
+    } catch (error) {
+      Alert.alert('エラー', '文字起こしに失敗しました');
+    }
+  };
+
+  const resetRecording = () => {
+    setRecordingStatus('idle');
+    setRecordTime(0);
+    setRecordingTitle('');
+    setRecordingMemo('');
+    setCurrentRecordingPath('');
+    setShowTitleModal(false);
+  };
+
+  const getRecordingButtonText = () => {
+    switch (recordingStatus) {
+      case 'idle':
+      case 'stopped':
+        return '録音開始';
+      case 'recording':
+        return '録音停止';
+      case 'paused':
+        return '録音停止';
+      default:
+        return '録音開始';
+    }
+  };
+
+  const getRecordingButtonColor = () => {
+    switch (recordingStatus) {
+      case 'recording':
+        return '#ff4444';
+      case 'paused':
+        return '#ff8844';
+      default:
+        return '#44aa44';
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.timeContainer}>
+        <Text style={styles.timeText}>
+          {recordingService.formatTime(recordTime)}
+        </Text>
+        <Text style={styles.statusText}>
+          {recordingStatus === 'recording' && '録音中'}
+          {recordingStatus === 'paused' && '一時停止中'}
+          {recordingStatus === 'idle' && '待機中'}
+          {recordingStatus === 'stopped' && '録音完了'}
+        </Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.recordButton,
+            { backgroundColor: getRecordingButtonColor() },
+          ]}
+          onPress={
+            recordingStatus === 'idle' || recordingStatus === 'stopped'
+              ? handleStartRecording
+              : handleStopRecording
+          }
+        >
+          <Text style={styles.recordButtonText}>
+            {getRecordingButtonText()}
+          </Text>
+        </TouchableOpacity>
+
+        {recordingStatus === 'recording' && (
+          <TouchableOpacity
+            style={[styles.controlButton, styles.pauseButton]}
+            onPress={handlePauseRecording}
+          >
+            <Text style={styles.controlButtonText}>一時停止</Text>
+          </TouchableOpacity>
+        )}
+
+        {recordingStatus === 'paused' && (
+          <TouchableOpacity
+            style={[styles.controlButton, styles.resumeButton]}
+            onPress={handleResumeRecording}
+          >
+            <Text style={styles.controlButtonText}>再開</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <Modal
+        visible={showTitleModal}
+        transparent
+        animationType="slide"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>録音を保存</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="タイトル（省略可）"
+              value={recordingTitle}
+              onChangeText={setRecordingTitle}
+            />
+            
+            <TextInput
+              style={[styles.input, styles.memoInput]}
+              placeholder="メモ（省略可）"
+              value={recordingMemo}
+              onChangeText={setRecordingMemo}
+              multiline
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={resetRecording}
+              >
+                <Text style={styles.cancelButtonText}>キャンセル</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSaveRecording}
+              >
+                <Text style={styles.saveButtonText}>保存</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  timeContainer: {
+    alignItems: 'center',
+    marginBottom: 50,
+  },
+  timeText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  statusText: {
+    fontSize: 18,
+    color: '#666',
+  },
+  buttonContainer: {
+    alignItems: 'center',
+  },
+  recordButton: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  recordButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  controlButton: {
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  pauseButton: {
+    backgroundColor: '#ff8844',
+  },
+  resumeButton: {
+    backgroundColor: '#44aa44',
+  },
+  controlButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  memoInput: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#ddd',
+    marginRight: 10,
+  },
+  saveButton: {
+    backgroundColor: '#007bff',
+    marginLeft: 10,
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});
