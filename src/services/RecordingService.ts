@@ -64,7 +64,7 @@ export class RecordingService {
         AudioSourceAndroid: 'mic',
         AVEncoderAudioQualityKeyIOS: 'medium',
         AVNumberOfChannelsKeyIOS: 1,
-        AVFormatIDKeyIOS: 'aac',
+        AVFormatIDKeyIOS: 'aac' as any,
         AVAudioSessionCategoryIOS: 'playAndRecord',
         AVAudioSessionModeIOS: 'measurement',
         AVAudioSessionCategoryOptionsIOS: ['mixWithOthers', 'allowBluetooth'],
@@ -73,7 +73,7 @@ export class RecordingService {
       // まず相対パスで試す
       try {
         console.log('相対パスで録音開始を試行:', fileName);
-        const uri = await this.audioRecorderPlayer.startRecorder(fileName, audioSet);
+        const uri = await this.audioRecorderPlayer.startRecorder(fileName, audioSet as any);
         
         this.audioRecorderPlayer.addRecordBackListener((e) => {
           this.currentRecordTime = e.currentPosition;
@@ -85,13 +85,13 @@ export class RecordingService {
         console.log('録音開始成功 (相対パス):', uri);
         return uri;
       } catch (relativeError) {
-        console.log('相対パスでの録音失敗:', relativeError.message);
+        console.log('相対パスでの録音失敗:', relativeError instanceof Error ? relativeError.message : 'Unknown error');
         
         // 相対パスで失敗した場合、フルパスで試す
         const fullPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
         console.log('フルパスで録音開始を試行:', fullPath);
         
-        const uri = await this.audioRecorderPlayer.startRecorder(fullPath, audioSet);
+        const uri = await this.audioRecorderPlayer.startRecorder(fullPath, audioSet as any);
         
         this.audioRecorderPlayer.addRecordBackListener((e) => {
           this.currentRecordTime = e.currentPosition;
@@ -105,7 +105,7 @@ export class RecordingService {
       }
     } catch (error) {
       console.error('録音開始エラー:', error);
-      console.error('エラー詳細:', error.message);
+      console.error('エラー詳細:', error instanceof Error ? error.message : 'Unknown error');
       throw error;
     }
   }
@@ -246,7 +246,7 @@ export class RecordingService {
         console.log('シーク成功:', seekPosition);
       } catch (seekError) {
         // シークに失敗した場合は、プレイヤーを再開始してからシーク
-        console.log('シーク失敗、プレイヤーを再開始:', seekError.message);
+        console.log('シーク失敗、プレイヤーを再開始:', seekError instanceof Error ? seekError.message : 'Unknown error');
         try {
           await this.audioRecorderPlayer.stopPlayer();
           this.isPlaying = true;

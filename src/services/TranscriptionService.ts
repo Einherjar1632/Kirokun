@@ -122,7 +122,7 @@ export class TranscriptionService {
     } catch (error) {
       console.error('=== 文字起こしエラー ===');
       console.error('エラー詳細:', error);
-      console.error('エラーメッセージ:', error.message);
+      console.error('エラーメッセージ:', error instanceof Error ? error.message : 'Unknown error');
       
       throw error;
     }

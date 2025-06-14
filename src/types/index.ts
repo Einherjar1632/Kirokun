@@ -3,6 +3,7 @@ export interface Recording {
   title: string;
   memo?: string;
   filePath: string;
+  uri?: string;
   duration: number;
   createdAt: Date;
   transcription?: string;

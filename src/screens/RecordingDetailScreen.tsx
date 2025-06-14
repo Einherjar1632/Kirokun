@@ -99,7 +99,7 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
       );
     } catch (error) {
       console.error('再生エラー:', error);
-      Alert.alert('エラー', `音声の再生に失敗しました: ${error.message}`);
+      Alert.alert('エラー', `音声の再生に失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setIsPlaying(false);
     }
   };
@@ -190,7 +190,7 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
       Alert.alert('成功', '要約が生成されました');
     } catch (error) {
       console.error('要約生成エラー:', error);
-      Alert.alert('エラー', `要約の生成に失敗しました: ${error.message}`);
+      Alert.alert('エラー', `要約の生成に失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSummarizing(false);
     }

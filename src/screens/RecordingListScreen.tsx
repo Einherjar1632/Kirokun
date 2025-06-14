@@ -92,7 +92,7 @@ export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording }) => {
               Alert.alert('完了', '文字起こしが完了しました');
             } catch (error) {
               console.error('文字起こしエラー:', error);
-              Alert.alert('エラー', `文字起こしに失敗しました: ${error.message}`);
+              Alert.alert('エラー', `文字起こしに失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
           },
         },
@@ -136,7 +136,7 @@ export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording }) => {
       );
     } catch (error) {
       console.error('再生エラー:', error);
-      Alert.alert('エラー', `音声の再生に失敗しました: ${error.message}`);
+      Alert.alert('エラー', `音声の再生に失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setPlayingRecordingId(null);
     }
   };
