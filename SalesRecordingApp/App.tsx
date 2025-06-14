@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
+  AppState,
 } from 'react-native';
 import { RecordingScreen } from './src/screens/RecordingScreen';
 import { RecordingListScreen } from './src/screens/RecordingListScreen';
@@ -17,6 +18,22 @@ type Screen = 'recording' | 'list' | 'detail';
 function App(): React.JSX.Element {
   const [currentScreen, setCurrentScreen] = useState<Screen>('recording');
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'background') {
+        console.log('アプリがバックグラウンドに移行しました');
+      } else if (nextAppState === 'active') {
+        console.log('アプリがアクティブになりました');
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   const handleSelectRecording = (recording: Recording) => {
     setSelectedRecording(recording);

@@ -57,7 +57,7 @@ export class RecordingService {
       console.log('生成されたファイル名:', fileName);
       console.log('Documents Path:', RNFS.DocumentDirectoryPath);
 
-      // シミュレーター対応の録音設定
+      // バックグラウンド録音対応の録音設定
       const audioSet = {
         AudioEncoderAndroid: 'aac',
         AudioSamplingRateAndroid: 44100,
@@ -65,6 +65,9 @@ export class RecordingService {
         AVEncoderAudioQualityKeyIOS: 'medium',
         AVNumberOfChannelsKeyIOS: 1,
         AVFormatIDKeyIOS: 'aac',
+        AVAudioSessionCategoryIOS: 'playAndRecord',
+        AVAudioSessionModeIOS: 'measurement',
+        AVAudioSessionCategoryOptionsIOS: ['mixWithOthers', 'allowBluetooth'],
       };
 
       // まず相対パスで試す
