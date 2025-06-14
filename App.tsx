@@ -63,7 +63,7 @@ function App(): React.JSX.Element {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>商談録音アプリ</Text>
+        <Text style={styles.headerTitle}>きろくん</Text>
       </View>
 
       {currentScreen !== 'detail' && (
@@ -110,56 +110,56 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F0E8',
   },
   header: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#8B5A3C',
     paddingVertical: 20,
     paddingHorizontal: 24,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#F5F0E8',
     letterSpacing: 0.5,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F3E8',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderBottomColor: '#E6D5C3',
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   tab: {
     flex: 1,
     paddingVertical: 16,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F3E8',
     borderRadius: 0,
   },
   activeTab: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F3E8',
     borderBottomWidth: 3,
-    borderBottomColor: '#3B82F6',
+    borderBottomColor: '#FFB199',
     transform: [{ translateY: 1 }],
   },
   tabText: {
     fontSize: 16,
-    color: '#64748B',
+    color: '#8B5A3C',
     fontWeight: '500',
   },
   activeTabText: {
-    color: '#3B82F6',
+    color: '#FFB199',
     fontWeight: '700',
   },
   content: {

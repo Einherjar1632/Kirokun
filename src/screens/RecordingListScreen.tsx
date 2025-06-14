@@ -247,8 +247,8 @@ ${recording.transcription}
                 onSlidingStart={handleSeekStart}
                 onValueChange={handleSeekChange}
                 onSlidingComplete={handleSeekComplete}
-                minimumTrackTintColor="#3B82F6"
-                maximumTrackTintColor="#E2E8F0"
+                minimumTrackTintColor="#FFB199"
+                maximumTrackTintColor="#E6D5C3"
               />
             </View>
             <Text style={styles.timeText}>
@@ -334,7 +334,7 @@ ${recording.transcription}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F0E8',
   },
   centerContainer: {
     flex: 1,
@@ -347,28 +347,28 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 20,
-    color: '#64748B',
+    color: '#8B5A3C',
     textAlign: 'center',
     marginBottom: 12,
     fontWeight: '600',
   },
   emptySubText: {
     fontSize: 16,
-    color: '#94A3B8',
+    color: '#B5845A',
     textAlign: 'center',
   },
   itemContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F3E8',
     padding: 20,
     marginBottom: 16,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#E6D5C3',
   },
   itemHeader: {
     flexDirection: 'row',
@@ -379,34 +379,36 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#8B5A3C',
     flex: 1,
   },
   itemDate: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#B5845A',
     fontWeight: '500',
   },
   itemDuration: {
     fontSize: 15,
-    color: '#3B82F6',
+    color: '#FFB199',
     marginBottom: 8,
     fontWeight: '600',
   },
   itemPreview: {
     fontSize: 15,
-    color: '#475569',
+    color: '#8B5A3C',
     lineHeight: 22,
     marginBottom: 8,
   },
   itemMemo: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#B5845A',
     fontStyle: 'italic',
     marginBottom: 16,
-    backgroundColor: '#F8FAFC',
-    padding: 8,
+    backgroundColor: '#FFFFFF',
+    padding: 12,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E6D5C3',
   },
   itemActions: {
     flexDirection: 'row',
@@ -418,40 +420,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   playButton: {
-    backgroundColor: '#0EA5E9',
+    backgroundColor: '#2563EB',
   },
   transcribeButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#059669',
   },
   shareButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#FFB199',
   },
   stopButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: '#78716C',
   },  
   deleteButton: {
-    backgroundColor: '#EF4444',
+    backgroundColor: '#DC2626',
   },
   actionButtonText: {
-    color: '#FFFFFF',
+    color: '#F9F3E8',
     fontSize: 13,
     fontWeight: '600',
   },
   playerContainer: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
     marginTop: 12,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    borderColor: '#E6D5C3',
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   playerControls: {
     flexDirection: 'row',
@@ -468,7 +475,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 13,
-    color: '#475569',
+    color: '#8B5A3C',
     minWidth: 50,
     textAlign: 'center',
     fontWeight: '500',

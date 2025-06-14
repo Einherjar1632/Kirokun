@@ -140,11 +140,11 @@ export const RecordingScreen: React.FC = () => {
   const getRecordingButtonColor = () => {
     switch (recordingStatus) {
       case 'recording':
-        return '#EF4444';
+        return '#DC2626';
       case 'paused':
-        return '#F59E0B';
+        return '#D97706';
       default:
-        return '#10B981';
+        return '#FFB199';
     }
   };
 
@@ -247,7 +247,7 @@ export const RecordingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F0E8',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -255,27 +255,29 @@ const styles = StyleSheet.create({
   timeContainer: {
     alignItems: 'center',
     marginBottom: 60,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F3E8',
     padding: 32,
     borderRadius: 24,
-    shadowColor: '#000',
+    shadowColor: '#8B5A3C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,
     minWidth: 280,
+    borderWidth: 2,
+    borderColor: '#E6D5C3',
   },
   timeText: {
     fontSize: 52,
     fontWeight: '800',
-    color: '#1E293B',
+    color: '#8B5A3C',
     marginBottom: 8,
     letterSpacing: -1,
   },
   statusText: {
     fontSize: 18,
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#B5845A',
+    fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
@@ -289,14 +291,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
-    shadowColor: '#000',
+    shadowColor: '#8B5A3C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 12,
   },
   recordButtonText: {
-    color: '#FFFFFF',
+    color: '#F9F3E8',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
@@ -305,57 +307,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 28,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
   },
   pauseButton: {
-    backgroundColor: '#F59E0B',
+    backgroundColor: '#D97706',
   },
   resumeButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#059669',
   },
   controlButtonText: {
-    color: '#FFFFFF',
+    color: '#F9F3E8',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(139, 90, 60, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F3E8',
     padding: 28,
     borderRadius: 20,
     width: '85%',
-    shadowColor: '#000',
+    shadowColor: '#8B5A3C',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 20,
+    borderWidth: 2,
+    borderColor: '#E6D5C3',
   },
   modalTitle: {
     fontSize: 22,
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 24,
-    color: '#1E293B',
+    color: '#8B5A3C',
   },
   input: {
     borderWidth: 2,
-    borderColor: '#E2E8F0',
+    borderColor: '#E6D5C3',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     fontSize: 16,
-    color: '#1E293B',
-    backgroundColor: '#F8FAFC',
+    color: '#8B5A3C',
+    backgroundColor: '#FFFFFF',
   },
   memoInput: {
     height: 100,
@@ -373,20 +377,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#E6D5C3',
     marginRight: 12,
   },
   saveButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#FFB199',
     marginLeft: 12,
   },
   cancelButtonText: {
-    color: '#475569',
+    color: '#8B5A3C',
     fontWeight: '600',
     fontSize: 16,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: '#F9F3E8',
     fontWeight: '700',
     fontSize: 16,
   },
