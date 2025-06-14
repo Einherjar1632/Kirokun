@@ -12,6 +12,7 @@ import Share from 'react-native-share';
 import { Recording } from '../types';
 import { RecordingService } from '../services/RecordingService';
 import { StorageService } from '../services/StorageService';
+import { TranscriptionService } from '../services/TranscriptionService';
 
 interface Props {
   recording: Recording;
@@ -25,6 +26,8 @@ export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack, onRe
   const [duration, setDuration] = useState<number>(recording.duration);
   const [recordingService] = useState(() => new RecordingService());
   const [isSliding, setIsSliding] = useState<boolean>(false);
+  const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
+  const [currentRecording, setCurrentRecording] = useState<Recording>(recording);
   const formatDuration = (milliseconds: number): string => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -40,24 +43,25 @@ export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack, onRe
   };
 
   const handleShare = async () => {
-    if (!recording.transcription) {
+    if (!currentRecording.transcription) {
       Alert.alert('文字起こしが必要', '先に文字起こしを実行してください');
       return;
     }
 
     try {
       const shareContent = `
-【${recording.title}】
-録音日時: ${recording.createdAt.toLocaleDateString()} ${recording.createdAt.toLocaleTimeString()}
-録音時間: ${formatDuration(recording.duration)}
+【${currentRecording.title}】
+録音日時: ${currentRecording.createdAt.toLocaleDateString()} ${currentRecording.createdAt.toLocaleTimeString()}
+録音時間: ${formatDuration(currentRecording.duration)}
 
-${recording.memo ? `メモ: ${recording.memo}\n\n` : ''}文字起こし内容:
-${recording.transcription}
+${currentRecording.memo ? `メモ: ${currentRecording.memo}\n\n` : ''}文字起こし内容:
+${currentRecording.transcription}
+${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
       `.trim();
 
       await Share.open({
         message: shareContent,
-        title: recording.title,
+        title: currentRecording.title,
       });
     } catch (error) {
       console.log('共有がキャンセルされました');
@@ -77,9 +81,9 @@ ${recording.transcription}
 
       setIsPlaying(true);
       setCurrentPosition(0);
-      setDuration(recording.duration);
+      setDuration(currentRecording.duration);
 
-      const audioPath = recording.filePath || recording.uri;
+      const audioPath = currentRecording.filePath || currentRecording.uri;
       if (!audioPath) {
         throw new Error('音声ファイルのパスが見つかりません');
       }
@@ -105,7 +109,7 @@ ${recording.transcription}
       await recordingService.stopPlayback();
       setIsPlaying(false);
       setCurrentPosition(0);
-      setDuration(recording.duration);
+      setDuration(currentRecording.duration);
     } catch (error) {
       console.error('停止エラー:', error);
     }
@@ -140,7 +144,7 @@ ${recording.transcription}
           onPress: async () => {
             try {
               await recordingService.stopPlayback();
-              await StorageService.deleteRecording(recording.id);
+              await StorageService.deleteRecording(currentRecording.id);
               onRecordingUpdated?.();
               onBack();
             } catch (error) {
@@ -152,16 +156,56 @@ ${recording.transcription}
     );
   };
 
+  const handleSummarize = async () => {
+    if (!currentRecording.transcription) {
+      Alert.alert('文字起こしが必要', '先に文字起こしを実行してください');
+      return;
+    }
+
+    if (currentRecording.summary) {
+      Alert.alert('確認', 'すでに要約が存在します。新しく生成しますか？', [
+        { text: 'キャンセル', style: 'cancel' },
+        { text: '生成', onPress: () => generateSummary() }
+      ]);
+      return;
+    }
+
+    await generateSummary();
+  };
+
+  const generateSummary = async () => {
+    try {
+      setIsSummarizing(true);
+      const summary = await TranscriptionService.generateSummary(currentRecording.transcription!);
+      
+      const updatedRecording = {
+        ...currentRecording,
+        summary
+      };
+      
+      await StorageService.saveRecording(updatedRecording);
+      setCurrentRecording(updatedRecording);
+      onRecordingUpdated?.();
+      
+      Alert.alert('成功', '要約が生成されました');
+    } catch (error) {
+      console.error('要約生成エラー:', error);
+      Alert.alert('エラー', `要約の生成に失敗しました: ${error.message}`);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   const renderTranscriptionWithSpeakers = () => {
-    if (!recording.speakers || recording.speakers.length === 0) {
+    if (!currentRecording.speakers || currentRecording.speakers.length === 0) {
       return (
         <Text style={styles.transcriptionText}>
-          {recording.transcription}
+          {currentRecording.transcription}
         </Text>
       );
     }
 
-    const allSegments = recording.speakers
+    const allSegments = currentRecording.speakers
       .flatMap(speaker => 
         speaker.segments.map(segment => ({
           ...segment,
@@ -201,6 +245,20 @@ ${recording.transcription}
             </Text>
           </TouchableOpacity>
           
+          <TouchableOpacity 
+            style={[
+              styles.actionButton, 
+              styles.summaryButton,
+              (!currentRecording.transcription || isSummarizing) && styles.disabledButton
+            ]} 
+            onPress={handleSummarize}
+            disabled={!currentRecording.transcription || isSummarizing}
+          >
+            <Text style={styles.actionButtonText}>
+              {isSummarizing ? '要約中...' : '要約'}
+            </Text>
+          </TouchableOpacity>
+          
           <TouchableOpacity style={[styles.actionButton, styles.shareButton]} onPress={handleShare}>
             <Text style={styles.actionButtonText}>共有</Text>
           </TouchableOpacity>
@@ -213,24 +271,24 @@ ${recording.transcription}
 
       <ScrollView style={styles.content}>
         <View style={styles.infoContainer}>
-          <Text style={styles.title}>{recording.title}</Text>
+          <Text style={styles.title}>{currentRecording.title}</Text>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>録音日時:</Text>
             <Text style={styles.infoValue}>
-              {recording.createdAt.toLocaleDateString()} {recording.createdAt.toLocaleTimeString()}
+              {currentRecording.createdAt.toLocaleDateString()} {currentRecording.createdAt.toLocaleTimeString()}
             </Text>
           </View>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>録音時間:</Text>
-            <Text style={styles.infoValue}>{formatDuration(recording.duration)}</Text>
+            <Text style={styles.infoValue}>{formatDuration(currentRecording.duration)}</Text>
           </View>
 
-          {recording.memo && (
+          {currentRecording.memo && (
             <View style={styles.memoContainer}>
               <Text style={styles.memoLabel}>メモ:</Text>
-              <Text style={styles.memoText}>{recording.memo}</Text>
+              <Text style={styles.memoText}>{currentRecording.memo}</Text>
             </View>
           )}
         </View>
@@ -270,7 +328,7 @@ ${recording.transcription}
         <View style={styles.transcriptionContainer}>
           <Text style={styles.transcriptionTitle}>文字起こし結果</Text>
           
-          {recording.transcription ? (
+          {currentRecording.transcription ? (
             <View style={styles.transcriptionContent}>
               {renderTranscriptionWithSpeakers()}
             </View>
@@ -285,6 +343,15 @@ ${recording.transcription}
             </View>
           )}
         </View>
+
+        {currentRecording.summary && (
+          <View style={styles.summaryContainer}>
+            <Text style={styles.summaryTitle}>要約</Text>
+            <View style={styles.summaryContent}>
+              <Text style={styles.summaryText}>{currentRecording.summary}</Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -327,11 +394,18 @@ const styles = StyleSheet.create({
   shareButton: {
     backgroundColor: '#007bff',
   },
+  summaryButton: {
+    backgroundColor: '#28a745',
+  },
   deleteButton: {
     backgroundColor: '#dc3545',
   },
   stopButton: {
     backgroundColor: '#6c757d',
+  },
+  disabledButton: {
+    backgroundColor: '#6c757d',
+    opacity: 0.6,
   },
   actionButtonText: {
     color: 'white',
@@ -475,5 +549,28 @@ const styles = StyleSheet.create({
     color: '#666',
     minWidth: 40,
     textAlign: 'center',
+  },
+  summaryContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 10,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  summaryContent: {
+    backgroundColor: '#f0f8f0',
+    padding: 15,
+    borderRadius: 5,
+    borderLeftWidth: 4,
+    borderLeftColor: '#28a745',
+  },
+  summaryText: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 22,
   },
 });

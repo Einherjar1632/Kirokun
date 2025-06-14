@@ -240,6 +240,83 @@ export class TranscriptionService {
     return { text, speakers };
   }
 
+  static async generateSummary(transcription: string): Promise<string> {
+    try {
+      console.log('=== 要約生成開始 ===');
+      console.log('文字起こしテキスト長:', transcription.length);
+      
+      if (!transcription.trim()) {
+        throw new Error('文字起こしテキストが空です');
+      }
+
+      // Gemini API リクエスト
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              {
+                text: `以下の文字起こしテキストを要約してください。以下の点に注意して処理をお願いします：
+
+【重要な指示】
+1. 商談や会議の内容として、重要なポイントを簡潔にまとめてください
+2. 話し合われた議題、決定事項、次回のアクションなどを整理してください
+3. 参加者の役割や立場が分かる場合は明記してください
+4. 3-5個の箇条書きで要約してください
+5. 日本語で、ビジネス文書として適切な表現で記載してください
+6. 不要な詳細は省略し、要点のみを抽出してください
+
+【出力形式】
+■ 議題・目的：[会議や商談の目的]
+■ 主要な内容：
+  • [重要ポイント1]
+  • [重要ポイント2]
+  • [重要ポイント3]
+■ 決定事項・合意点：[決まったこと]
+■ 次回アクション：[今後の予定や課題]
+
+【文字起こしテキスト】
+${transcription}
+
+上記の内容を分析し、ビジネス要約として整理してください。`
+              }
+            ]
+          }
+        ]
+      };
+
+      console.log('Gemini API要約リクエスト送信中...');
+      const response = await fetch(`${this.API_URL}?key=${this.API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('要約API レスポンス ステータス:', response.status);
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Gemini API エラー: ${response.status} - ${JSON.stringify(responseData)}`);
+      }
+
+      if (!responseData.candidates || !responseData.candidates[0] || !responseData.candidates[0].content) {
+        console.log('要約APIレスポンス詳細:', JSON.stringify(responseData, null, 2));
+        throw new Error('要約の生成に失敗しました');
+      }
+
+      const summaryText = responseData.candidates[0].content.parts[0].text;
+      console.log('要約結果:', summaryText);
+      console.log('=== 要約生成完了 ===');
+
+      return summaryText;
+    } catch (error) {
+      console.error('=== 要約生成エラー ===');
+      console.error('エラー詳細:', error);
+      throw error;
+    }
+  }
+
   static async processRecording(recording: Recording): Promise<Recording> {
     try {
       const { transcription, speakers } = await this.transcribeAudio(recording.filePath);

@@ -7,6 +7,7 @@ export interface Recording {
   createdAt: Date;
   transcription?: string;
   speakers?: Speaker[];
+  summary?: string;
 }
 
 export interface Speaker {
