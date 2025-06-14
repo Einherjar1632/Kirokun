@@ -183,7 +183,7 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
         summary
       };
       
-      await StorageService.saveRecording(updatedRecording);
+      await StorageService.updateRecording(currentRecording.id, { summary });
       setCurrentRecording(updatedRecording);
       onRecordingUpdated?.();
       
@@ -217,7 +217,7 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
     return (
       <View>
         {allSegments.map((segment, index) => (
-          <View key={index} style={styles.segmentContainer}>
+          <View key={`segment-${segment.startTime}-${index}`} style={styles.segmentContainer}>
             <View style={styles.segmentHeader}>
               <Text style={styles.speakerName}>{segment.speakerName}</Text>
               <Text style={styles.segmentTime}>

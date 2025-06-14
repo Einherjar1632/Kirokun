@@ -324,7 +324,7 @@ ${recording.transcription}
       <FlatList
         data={recordings}
         renderItem={renderRecordingItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         contentContainerStyle={styles.listContainer}
       />
     </View>
