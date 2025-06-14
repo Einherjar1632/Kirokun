@@ -400,16 +400,16 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   playButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#8B5A3C',
   },
   shareButton: {
     backgroundColor: '#FFB199',
   },
   summaryButton: {
-    backgroundColor: '#059669',
+    backgroundColor: '#B5845A',
   },
   deleteButton: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#CD5C5C',
   },
   stopButton: {
     backgroundColor: '#78716C',

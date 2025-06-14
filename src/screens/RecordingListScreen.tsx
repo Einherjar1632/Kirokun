@@ -427,10 +427,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   playButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#8B5A3C',
   },
   transcribeButton: {
-    backgroundColor: '#059669',
+    backgroundColor: '#B5845A',
   },
   shareButton: {
     backgroundColor: '#FFB199',
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#78716C',
   },  
   deleteButton: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#CD5C5C',
   },
   actionButtonText: {
     color: '#F9F3E8',

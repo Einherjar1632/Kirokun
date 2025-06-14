@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   saveButton: {
-    backgroundColor: '#FFB199',
+    backgroundColor: '#8B5A3C',
     marginLeft: 12,
   },
   cancelButtonText: {
