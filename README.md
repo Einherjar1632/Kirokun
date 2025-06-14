@@ -1,79 +1,162 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# きろくん
 
-# Getting Started
+商談や会議の音声録音・文字起こし・要約を一元管理できるReact Nativeアプリです。
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## 📱 概要
 
-## Step 1: Start the Metro Server
+「きろくん」は、ビジネスシーンでの音声記録を効率化するモバイルアプリケーションです。録音から文字起こし、要約生成までを一つのアプリで完結し、商談や会議の内容を簡単に管理・共有できます。
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## ✨ 主要機能
 
-To start Metro, run the following command from the _root_ of your React Native project:
+### 🎙️ 音声録音
+- **高品質な音声録音**：一時停止・再開機能付き
+- **リアルタイム録音時間表示**：録音状況を視覚的に確認
+- **タイトル・メモ機能**：録音内容の詳細情報を記録
 
+### 📝 AIによる文字起こし
+- **Gemini API活用**：Googleの最新AI技術で高精度な文字起こし
+- **話者識別機能**：複数の話者を自動識別・分離
+- **ノイズ除去**：間投詞や不要な口癖を自動削除
+- **ビジネス文体変換**：自然で読みやすい文章に自動整形
+
+### 📊 要約生成
+- **自動要約機能**：文字起こし内容から重要ポイントを抽出
+- **構造化された要約**：議題、決定事項、次回アクションを整理
+- **ビジネス文書形式**：そのまま報告書として活用可能
+
+### 📂 録音管理
+- **録音一覧表示**：過去の録音を日付順で管理
+- **詳細表示機能**：文字起こし・要約・メモを統合表示
+- **共有機能**：他のアプリやメールで内容を共有
+
+## 🛠️ 技術スタック
+
+- **フレームワーク**: React Native 0.74.0
+- **言語**: TypeScript 5.0.4
+- **AI API**: Google Gemini 1.5 Flash
+- **音声処理**: react-native-audio-recorder-player
+- **データ保存**: AsyncStorage
+- **ファイル管理**: react-native-fs
+- **権限管理**: react-native-permissions
+- **UI/UX**: React Native標準コンポーネント
+
+## 🚀 セットアップ
+
+### 前提条件
+
+- Node.js >= 18
+- React Native開発環境
+- iOS開発環境（Xcode）またはAndroid開発環境（Android Studio）
+- Gemini API キー
+
+### インストール手順
+
+1. **リポジトリのクローン**
 ```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
+git clone <repository-url>
+cd Kirokun
 ```
 
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
+2. **依存関係のインストール**
 ```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
+npm install
 ```
 
-### For iOS
-
+3. **iOS依存関係のインストール**
 ```bash
-# using npm
+npx pod-install
+```
+
+4. **環境変数の設定**
+`.env`ファイルを作成し、Gemini APIキーを設定：
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 実行方法
+
+**iOS**
+```bash
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+**Android**
+```bash
+npm run android
+```
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+## 🎯 使用方法
 
-## Step 3: Modifying your App
+### 1. 音声録音
+1. アプリを起動し、「録音」タブを選択
+2. 「録音開始」ボタンをタップして録音開始
+3. 必要に応じて「一時停止」「再開」機能を使用
+4. 「録音停止」ボタンで録音終了
+5. タイトルとメモを入力して保存
 
-Now that you have successfully run the app, let's modify it.
+### 2. 文字起こし
+1. 録音保存時に「文字起こしを開始しますか？」で「開始」を選択
+2. AIが自動で音声を解析し、文字起こしを実行
+3. 話者の識別と内容の整形が自動実行
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+### 3. 録音管理
+1. 「録音一覧」タブで過去の録音を確認
+2. 録音をタップして詳細画面を表示
+3. 文字起こし内容や要約を確認・共有
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+## 📁 プロジェクト構造
 
-## Congratulations! :tada:
+```
+src/
+├── components/          # 再利用可能なUIコンポーネント
+├── screens/            # 画面コンポーネント
+│   ├── RecordingScreen.tsx          # 録音画面
+│   ├── RecordingListScreen.tsx      # 録音一覧画面
+│   └── RecordingDetailScreen.tsx    # 録音詳細画面
+├── services/           # ビジネスロジック・API連携
+│   ├── RecordingService.ts          # 録音関連サービス
+│   ├── StorageService.ts            # データ保存サービス
+│   └── TranscriptionService.ts      # 文字起こしサービス
+├── types/              # TypeScript型定義
+│   └── index.ts                     # アプリケーション共通型
+└── utils/              # ユーティリティ関数
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+## ⚙️ 開発・デバッグ
 
-### Now what?
+### コード品質チェック
+```bash
+npm run lint          # ESLintでコード品質チェック
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+### テスト実行
+```bash
+npm test             # Jestでテスト実行
+```
 
-# Troubleshooting
+### 開発サーバー起動
+```bash
+npm start            # Metro bundler起動
+```
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## 🔧 設定・カスタマイズ
 
-# Learn More
+### Gemini API設定
+- `src/services/TranscriptionService.ts`でAPI設定をカスタマイズ可能
+- プロンプトの調整により文字起こし精度を向上可能
 
-To learn more about React Native, take a look at the following resources:
+### 音質設定
+- `src/services/RecordingService.ts`で録音品質設定を調整可能
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## 📄 ライセンス
+
+このプロジェクトはプライベートプロジェクトです。
+
+## 🤝 コントリビューション
+
+バグ報告や機能要望がございましたら、Issueを作成してください。
+
+---
+
+**開発者**: Einherjar1632  
+**最終更新**: 2025年6月
