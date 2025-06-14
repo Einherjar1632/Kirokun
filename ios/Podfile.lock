@@ -1188,6 +1188,8 @@ PODS:
     - React-Core
   - RNCAsyncStorage (2.2.0):
     - React-Core
+  - RNCClipboard (1.16.2):
+    - React-Core
   - RNFS (2.20.0):
     - React-Core
   - RNPermissions (5.4.1):
@@ -1275,6 +1277,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNAudioRecorderPlayer (from `../node_modules/react-native-audio-recorder-player`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -1398,6 +1401,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-audio-recorder-player"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../node_modules/@react-native-clipboard/clipboard"
   RNFS:
     :path: "../node_modules/react-native-fs"
   RNPermissions:
@@ -1464,6 +1469,7 @@ SPEC CHECKSUMS:
   ReactCommon: b1dfa365018c636c73437981ee235c1a35f0e34f
   RNAudioRecorderPlayer: 11df0c7b614e9767ef24d896465c3a758c592de7
   RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
+  RNCClipboard: e1d17c9d093d8129ef50b39b63a17a0e8ccd0ade
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNPermissions: 2bde0f50340b36bef585008b5762500ca8c277d6
   RNShare: 7c84b1d5b59f067095db0f3a38b7342f059be76b

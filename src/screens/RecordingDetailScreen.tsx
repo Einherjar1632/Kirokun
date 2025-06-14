@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import Slider from '@react-native-community/slider';
 import Share from 'react-native-share';
 import { Recording } from '../types';
@@ -28,6 +29,8 @@ export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack, onRe
   const [isSliding, setIsSliding] = useState<boolean>(false);
   const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
   const [currentRecording, setCurrentRecording] = useState<Recording>(recording);
+  const [copiedTranscription, setCopiedTranscription] = useState(false);
+  const [copiedSummary, setCopiedSummary] = useState(false);
   const formatDuration = (milliseconds: number): string => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -326,7 +329,23 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
         )}
 
         <View style={styles.transcriptionContainer}>
-          <Text style={styles.transcriptionTitle}>文字起こし結果</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.transcriptionTitle}>文字起こし結果</Text>
+            {currentRecording.transcription && (
+              <TouchableOpacity
+                style={styles.copyButton}
+                onPress={() => {
+                  Clipboard.setString(currentRecording.transcription || '');
+                  setCopiedTranscription(true);
+                  setTimeout(() => setCopiedTranscription(false), 2000);
+                }}
+              >
+                <Text style={styles.copyButtonText}>
+                  {copiedTranscription ? 'コピー済み' : 'すべてコピー'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
           
           {currentRecording.transcription ? (
             <View style={styles.transcriptionContent}>
@@ -346,7 +365,21 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
 
         {currentRecording.summary && (
           <View style={styles.summaryContainer}>
-            <Text style={styles.summaryTitle}>要約</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.summaryTitle}>要約</Text>
+              <TouchableOpacity
+                style={styles.copyButton}
+                onPress={() => {
+                  Clipboard.setString(currentRecording.summary || '');
+                  setCopiedSummary(true);
+                  setTimeout(() => setCopiedSummary(false), 2000);
+                }}
+              >
+                <Text style={styles.copyButtonText}>
+                  {copiedSummary ? 'コピー済み' : 'すべてコピー'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.summaryContent}>
               <Text style={styles.summaryText}>{currentRecording.summary}</Text>
             </View>
@@ -498,11 +531,29 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#E6D5C3',
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   transcriptionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#8B5A3C',
-    marginBottom: 20,
+  },
+  copyButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#F5F0E8',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E6D5C3',
+  },
+  copyButtonText: {
+    fontSize: 13,
+    color: '#B5845A',
+    fontWeight: '600',
   },
   transcriptionContent: {
     backgroundColor: '#FFFFFF',
@@ -612,7 +663,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#8B5A3C',
-    marginBottom: 20,
   },
   summaryContent: {
     backgroundColor: '#F0FDF2',
