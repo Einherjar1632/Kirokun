@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,24 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import Share from 'react-native-share';
 import { Recording } from '../types';
+import { RecordingService } from '../services/RecordingService';
+import { StorageService } from '../services/StorageService';
 
 interface Props {
   recording: Recording;
   onBack: () => void;
+  onRecordingUpdated?: () => void;
 }
 
-export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack }) => {
+export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack, onRecordingUpdated }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(recording.duration);
+  const [recordingService] = useState(() => new RecordingService());
+  const [isSliding, setIsSliding] = useState<boolean>(false);
   const formatDuration = (milliseconds: number): string => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -53,6 +62,94 @@ ${recording.transcription}
     } catch (error) {
       console.log('共有がキャンセルされました');
     }
+  };
+
+  const handlePlayRecording = async () => {
+    try {
+      if (isPlaying) {
+        if (recordingService.getIsPlaying()) {
+          await recordingService.pausePlayback();
+        } else {
+          await recordingService.resumePlayback();
+        }
+        return;
+      }
+
+      setIsPlaying(true);
+      setCurrentPosition(0);
+      setDuration(recording.duration);
+
+      const audioPath = recording.filePath || recording.uri;
+      if (!audioPath) {
+        throw new Error('音声ファイルのパスが見つかりません');
+      }
+
+      await recordingService.startPlayback(
+        audioPath,
+        (position, duration) => {
+          if (!isSliding) {
+            setCurrentPosition(position);
+          }
+          setDuration(duration);
+        }
+      );
+    } catch (error) {
+      console.error('再生エラー:', error);
+      Alert.alert('エラー', `音声の再生に失敗しました: ${error.message}`);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleStopPlayback = async () => {
+    try {
+      await recordingService.stopPlayback();
+      setIsPlaying(false);
+      setCurrentPosition(0);
+      setDuration(recording.duration);
+    } catch (error) {
+      console.error('停止エラー:', error);
+    }
+  };
+
+  const handleSeekStart = () => {
+    setIsSliding(true);
+  };
+
+  const handleSeekChange = (position: number) => {
+    setCurrentPosition(position);
+  };
+
+  const handleSeekComplete = async (position: number) => {
+    try {
+      setIsSliding(false);
+      await recordingService.seekToTime(position);
+    } catch (error) {
+      console.error('シークエラー:', error);
+    }
+  };
+
+  const handleDeleteRecording = async () => {
+    Alert.alert(
+      '削除確認',
+      'この録音を削除しますか？',
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        {
+          text: '削除',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await recordingService.stopPlayback();
+              await StorageService.deleteRecording(recording.id);
+              onRecordingUpdated?.();
+              onBack();
+            } catch (error) {
+              Alert.alert('エラー', '録音の削除に失敗しました');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderTranscriptionWithSpeakers = () => {
@@ -97,9 +194,21 @@ ${recording.transcription}
           <Text style={styles.backButtonText}>← 戻る</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareButtonText}>共有</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={[styles.actionButton, styles.playButton]} onPress={handlePlayRecording}>
+            <Text style={styles.actionButtonText}>
+              {isPlaying && recordingService.getIsPlaying() ? '一時停止' : '再生'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={[styles.actionButton, styles.shareButton]} onPress={handleShare}>
+            <Text style={styles.actionButtonText}>共有</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDeleteRecording}>
+            <Text style={styles.actionButtonText}>削除</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content}>
@@ -125,6 +234,38 @@ ${recording.transcription}
             </View>
           )}
         </View>
+
+        {isPlaying && (
+          <View style={styles.playerContainer}>
+            <View style={styles.playerControls}>
+              <Text style={styles.timeText}>
+                {recordingService.formatTime(currentPosition)}
+              </Text>
+              <View style={styles.sliderContainer}>
+                <Slider
+                  style={styles.slider}
+                  value={currentPosition}
+                  minimumValue={0}
+                  maximumValue={Math.max(duration, 1)}
+                  onSlidingStart={handleSeekStart}
+                  onValueChange={handleSeekChange}
+                  onSlidingComplete={handleSeekComplete}
+                  minimumTrackTintColor="#007bff"
+                  maximumTrackTintColor="#ddd"
+                />
+              </View>
+              <Text style={styles.timeText}>
+                {recordingService.formatTime(duration)}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.stopButton]}
+              onPress={handleStopPlayback}
+            >
+              <Text style={styles.actionButtonText}>停止</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.transcriptionContainer}>
           <Text style={styles.transcriptionTitle}>文字起こし結果</Text>
@@ -171,15 +312,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007bff',
   },
+  headerActions: {
+    flexDirection: 'row',
+  },
+  actionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  playButton: {
+    backgroundColor: '#17a2b8',
+  },
   shareButton: {
     backgroundColor: '#007bff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 5,
   },
-  shareButtonText: {
+  deleteButton: {
+    backgroundColor: '#dc3545',
+  },
+  stopButton: {
+    backgroundColor: '#6c757d',
+  },
+  actionButtonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   content: {
@@ -288,6 +444,36 @@ const styles = StyleSheet.create({
   noTranscriptionSubText: {
     fontSize: 14,
     color: '#999',
+    textAlign: 'center',
+  },
+  playerContainer: {
+    backgroundColor: 'white',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  playerControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sliderContainer: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  timeText: {
+    fontSize: 12,
+    color: '#666',
+    minWidth: 40,
     textAlign: 'center',
   },
 });
