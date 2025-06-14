@@ -44,18 +44,21 @@ export class TranscriptionService {
                 text: `この音声ファイルを文字起こししてください。以下の点に注意して処理をお願いします：
 
 【重要な指示】
-1. 「あー」「えー」「うーん」などの間投詞・言いよどみは削除してください
-2. 「えっと」「その」「まあ」などの不要な口癖も削除してください
-3. 咳、笑い声、物音などの非言語音は除外してください
-4. 意味のある内容のみを抽出し、自然で読みやすい文章にしてください
-5. 話者が複数いる場合は「話者1:」「話者2:」のように識別してください
-6. 商談や会議の内容として適切な敬語と文体に整えてください
-7. 重複した表現や言い直しがある場合は、最終的な意図を汲み取って一つにまとめてください
+1. 音声が短い場合でも、聞き取れる内容があれば必ず文字起こしを行ってください
+2. 「あー」「えー」「うーん」などの間投詞・言いよどみは削除してください
+3. 「えっと」「その」「まあ」などの不要な口癖も削除してください
+4. 咳、笑い声、物音などの非言語音は除外してください
+5. 意味のある内容のみを抽出し、自然で読みやすい文章にしてください
+6. 話者が複数いる場合は「話者1:」「話者2:」のように識別してください
+7. 商談や会議の内容として適切な敬語と文体に整えてください
+8. 重複した表現や言い直しがある場合は、最終的な意図を汲み取って一つにまとめてください
+9. 音声が非常に短い場合や内容が少ない場合でも、聞き取れる単語や文章があれば出力してください
 
 【出力形式】
 話者1: [整理された発言内容]
 話者2: [整理された発言内容]
 
+音声内容が検出できない場合は「音声内容を検出できませんでした」と回答してください。
 日本語で応答してください。`
               },
               {
@@ -87,11 +90,30 @@ export class TranscriptionService {
       }
 
       if (!responseData.candidates || !responseData.candidates[0] || !responseData.candidates[0].content) {
+        console.log('Gemini APIレスポンス詳細:', JSON.stringify(responseData, null, 2));
+        
+        // 特定のエラーケースをチェック
+        if (responseData.candidates && responseData.candidates[0] && 
+            responseData.candidates[0].finishReason === 'OTHER') {
+          throw new Error('音声が短すぎるか、音声内容が検出できませんでした。もう少し長く録音してみてください。');
+        }
+        
+        if (responseData.error) {
+          throw new Error(`API エラー: ${responseData.error.message || '不明なエラー'}`);
+        }
+        
         throw new Error('音声データがないため、文字起こしを行うことができません');
       }
 
       const transcriptionText = responseData.candidates[0].content.parts[0].text;
       console.log('文字起こし結果:', transcriptionText);
+
+      // 音声内容が検出できなかった場合の処理
+      if (transcriptionText.includes('音声内容を検出できませんでした') || 
+          transcriptionText.includes('検出できません') ||
+          transcriptionText.trim() === '') {
+        throw new Error('音声が短すぎるか、音声内容が検出できませんでした。もう少し長く、はっきりと録音してみてください。');
+      }
 
       const { text, speakers } = this.parseTranscription(transcriptionText);
 
