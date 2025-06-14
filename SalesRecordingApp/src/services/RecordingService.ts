@@ -1,5 +1,6 @@
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { Platform, PermissionsAndroid } from 'react-native';
+import RNFS from 'react-native-fs';
 import { Recording, RecordingStatus } from '../types';
 
 export class RecordingService {
@@ -48,10 +49,13 @@ export class RecordingService {
       
       // ユニークなファイル名を生成
       const timestamp = new Date().getTime();
-      const path = Platform.select({
+      const fileName = Platform.select({
         ios: `recording_${timestamp}.m4a`,
         android: `recording_${timestamp}.mp4`,
       });
+
+      console.log('生成されたファイル名:', fileName);
+      console.log('Documents Path:', RNFS.DocumentDirectoryPath);
 
       // シミュレーター対応の録音設定
       const audioSet = {
@@ -63,19 +67,42 @@ export class RecordingService {
         AVFormatIDKeyIOS: 'aac',
       };
 
-      const uri = await this.audioRecorderPlayer.startRecorder(path, audioSet);
-      
-      this.audioRecorderPlayer.addRecordBackListener((e) => {
-        this.currentRecordTime = e.currentPosition;
-        if (this.onRecordUpdate) {
-          this.onRecordUpdate(e.currentPosition);
-        }
-      });
+      // まず相対パスで試す
+      try {
+        console.log('相対パスで録音開始を試行:', fileName);
+        const uri = await this.audioRecorderPlayer.startRecorder(fileName, audioSet);
+        
+        this.audioRecorderPlayer.addRecordBackListener((e) => {
+          this.currentRecordTime = e.currentPosition;
+          if (this.onRecordUpdate) {
+            this.onRecordUpdate(e.currentPosition);
+          }
+        });
 
-      console.log('録音開始:', uri);
-      return uri;
+        console.log('録音開始成功 (相対パス):', uri);
+        return uri;
+      } catch (relativeError) {
+        console.log('相対パスでの録音失敗:', relativeError.message);
+        
+        // 相対パスで失敗した場合、フルパスで試す
+        const fullPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        console.log('フルパスで録音開始を試行:', fullPath);
+        
+        const uri = await this.audioRecorderPlayer.startRecorder(fullPath, audioSet);
+        
+        this.audioRecorderPlayer.addRecordBackListener((e) => {
+          this.currentRecordTime = e.currentPosition;
+          if (this.onRecordUpdate) {
+            this.onRecordUpdate(e.currentPosition);
+          }
+        });
+
+        console.log('録音開始成功 (フルパス):', uri);
+        return uri;
+      }
     } catch (error) {
       console.error('録音開始エラー:', error);
+      console.error('エラー詳細:', error.message);
       throw error;
     }
   }
