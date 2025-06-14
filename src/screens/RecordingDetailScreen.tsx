@@ -18,13 +18,13 @@ interface Props {
   recording: Recording;
   onBack: () => void;
   onRecordingUpdated?: () => void;
+  recordingService: RecordingService;
 }
 
-export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack, onRecordingUpdated }) => {
+export const RecordingDetailScreen: React.FC<Props> = ({ recording, onBack, onRecordingUpdated, recordingService }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
   const [duration, setDuration] = useState<number>(recording.duration);
-  const [recordingService] = useState(() => new RecordingService());
   const [isSliding, setIsSliding] = useState<boolean>(false);
   const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
   const [currentRecording, setCurrentRecording] = useState<Recording>(recording);

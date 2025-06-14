@@ -13,10 +13,13 @@ import { StorageService } from '../services/StorageService';
 import { TranscriptionService } from '../services/TranscriptionService';
 import { Recording, RecordingStatus } from '../types';
 
-export const RecordingScreen: React.FC = () => {
+interface RecordingScreenProps {
+  recordingService: RecordingService;
+}
+
+export const RecordingScreen: React.FC<RecordingScreenProps> = ({ recordingService }) => {
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>('idle');
   const [recordTime, setRecordTime] = useState<number>(0);
-  const [recordingService] = useState(() => new RecordingService());
   const [showTitleModal, setShowTitleModal] = useState(false);
   const [recordingTitle, setRecordingTitle] = useState('');
   const [recordingMemo, setRecordingMemo] = useState('');

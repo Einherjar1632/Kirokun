@@ -16,15 +16,15 @@ import { Recording } from '../types';
 
 interface Props {
   onSelectRecording: (recording: Recording) => void;
+  recordingService: RecordingService;
 }
 
-export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording }) => {
+export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording, recordingService }) => {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingRecordingId, setPlayingRecordingId] = useState<string | null>(null);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
-  const [recordingService] = useState(() => new RecordingService());
   const [isSliding, setIsSliding] = useState<boolean>(false);
 
   useEffect(() => {

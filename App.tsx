@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
   View,
@@ -12,12 +12,17 @@ import { RecordingScreen } from './src/screens/RecordingScreen';
 import { RecordingListScreen } from './src/screens/RecordingListScreen';
 import { RecordingDetailScreen } from './src/screens/RecordingDetailScreen';
 import { Recording } from './src/types';
+import { RecordingService } from './src/services/RecordingService';
 
 type Screen = 'recording' | 'list' | 'detail';
+
+// グローバルなRecordingServiceインスタンスを作成
+const recordingService = new RecordingService();
 
 function App(): React.JSX.Element {
   const [currentScreen, setCurrentScreen] = useState<Screen>('recording');
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
+  const previousScreenRef = useRef<Screen>(currentScreen);
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
@@ -35,6 +40,28 @@ function App(): React.JSX.Element {
     };
   }, []);
 
+  // 画面切り替え時に音声再生を停止
+  useEffect(() => {
+    // 画面が実際に変更された場合のみ停止
+    if (previousScreenRef.current !== currentScreen) {
+      console.log('画面切り替え検出:', previousScreenRef.current, '->', currentScreen);
+      
+      const stopPlayback = async () => {
+        if (recordingService.getIsPlaying()) {
+          console.log('再生を停止します');
+          try {
+            await recordingService.stopPlayback();
+          } catch (error) {
+            console.error('再生停止エラー:', error);
+          }
+        }
+      };
+
+      stopPlayback();
+      previousScreenRef.current = currentScreen;
+    }
+  }, [currentScreen]);
+
   const handleSelectRecording = (recording: Recording) => {
     setSelectedRecording(recording);
     setCurrentScreen('detail');
@@ -43,14 +70,15 @@ function App(): React.JSX.Element {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'recording':
-        return <RecordingScreen />;
+        return <RecordingScreen recordingService={recordingService} />;
       case 'list':
-        return <RecordingListScreen onSelectRecording={handleSelectRecording} />;
+        return <RecordingListScreen onSelectRecording={handleSelectRecording} recordingService={recordingService} />;
       case 'detail':
         return selectedRecording ? (
           <RecordingDetailScreen 
             recording={selectedRecording} 
             onBack={() => setCurrentScreen('list')}
+            recordingService={recordingService}
           />
         ) : null;
       default:
