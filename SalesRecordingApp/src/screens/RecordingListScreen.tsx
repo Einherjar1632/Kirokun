@@ -7,9 +7,11 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import Share from 'react-native-share';
 import { StorageService } from '../services/StorageService';
 import { TranscriptionService } from '../services/TranscriptionService';
+import { RecordingService } from '../services/RecordingService';
 import { Recording } from '../types';
 
 interface Props {
@@ -19,6 +21,11 @@ interface Props {
 export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording }) => {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playingRecordingId, setPlayingRecordingId] = useState<string | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [recordingService] = useState(() => new RecordingService());
+  const [isSliding, setIsSliding] = useState<boolean>(false);
 
   useEffect(() => {
     loadRecordings();
@@ -93,6 +100,75 @@ export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording }) => {
     );
   };
 
+  const handlePlayRecording = async (recording: Recording) => {
+    try {
+      if (playingRecordingId === recording.id) {
+        if (recordingService.getIsPlaying()) {
+          await recordingService.pausePlayback();
+        } else {
+          await recordingService.resumePlayback();
+        }
+        return;
+      }
+
+      if (playingRecordingId) {
+        await recordingService.stopPlayback();
+      }
+
+      setPlayingRecordingId(recording.id);
+      setCurrentPosition(0);
+      setDuration(recording.duration);
+
+      // filePathまたはuriを使用
+      const audioPath = recording.filePath || recording.uri;
+      if (!audioPath) {
+        throw new Error('音声ファイルのパスが見つかりません');
+      }
+
+      await recordingService.startPlayback(
+        audioPath,
+        (position, duration) => {
+          if (!isSliding) {
+            setCurrentPosition(position);
+          }
+          setDuration(duration);
+        }
+      );
+    } catch (error) {
+      console.error('再生エラー:', error);
+      Alert.alert('エラー', `音声の再生に失敗しました: ${error.message}`);
+      setPlayingRecordingId(null);
+    }
+  };
+
+  const handleStopPlayback = async () => {
+    try {
+      await recordingService.stopPlayback();
+      setPlayingRecordingId(null);
+      setCurrentPosition(0);
+      setDuration(0);
+    } catch (error) {
+      console.error('停止エラー:', error);
+    }
+  };
+
+  const handleSeekStart = () => {
+    setIsSliding(true);
+  };
+
+  const handleSeekChange = (position: number) => {
+    setCurrentPosition(position);
+  };
+
+  const handleSeekComplete = async (position: number) => {
+    try {
+      setIsSliding(false);
+      await recordingService.seekToTime(position);
+    } catch (error) {
+      console.error('シークエラー:', error);
+    }
+  };
+
   const handleShareRecording = async (recording: Recording) => {
     if (!recording.transcription) {
       Alert.alert('文字起こしが必要', '先に文字起こしを実行してください');
@@ -156,7 +232,48 @@ ${recording.transcription}
         <Text style={styles.itemMemo}>メモ: {item.memo}</Text>
       )}
 
+      {playingRecordingId === item.id ? (
+        <View style={styles.playerContainer}>
+          <View style={styles.playerControls}>
+            <Text style={styles.timeText}>
+              {recordingService.formatTime(currentPosition)}
+            </Text>
+            <View style={styles.sliderContainer}>
+              <Slider
+                style={styles.slider}
+                value={currentPosition}
+                minimumValue={0}
+                maximumValue={Math.max(duration, 1)}
+                onSlidingStart={handleSeekStart}
+                onValueChange={handleSeekChange}
+                onSlidingComplete={handleSeekComplete}
+                minimumTrackTintColor="#007bff"
+                maximumTrackTintColor="#ddd"
+              />
+            </View>
+            <Text style={styles.timeText}>
+              {recordingService.formatTime(duration)}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.stopButton]}
+            onPress={handleStopPlayback}
+          >
+            <Text style={styles.actionButtonText}>停止</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
       <View style={styles.itemActions}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.playButton]}
+          onPress={() => handlePlayRecording(item)}
+        >
+          <Text style={styles.actionButtonText}>
+            {playingRecordingId === item.id && recordingService.getIsPlaying() ? '一時停止' : '再生'}
+          </Text>
+        </TouchableOpacity>
+        
         {!item.transcription && (
           <TouchableOpacity
             style={[styles.actionButton, styles.transcribeButton]}
@@ -294,12 +411,18 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginLeft: 8,
   },
+  playButton: {
+    backgroundColor: '#17a2b8',
+  },
   transcribeButton: {
     backgroundColor: '#28a745',
   },
   shareButton: {
     backgroundColor: '#007bff',
   },
+  stopButton: {
+    backgroundColor: '#6c757d',
+  },  
   deleteButton: {
     backgroundColor: '#dc3545',
   },
@@ -307,5 +430,31 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  playerContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  playerControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sliderContainer: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  timeText: {
+    fontSize: 12,
+    color: '#666',
+    minWidth: 40,
+    textAlign: 'center',
   },
 });
