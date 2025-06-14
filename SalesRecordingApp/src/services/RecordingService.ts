@@ -47,7 +47,17 @@ export class RecordingService {
         android: 'recording.mp4',
       });
 
-      const uri = await this.audioRecorderPlayer.startRecorder(path);
+      // シミュレーター対応の録音設定
+      const audioSet = {
+        AudioEncoderAndroid: 'aac',
+        AudioSamplingRateAndroid: 44100,
+        AudioSourceAndroid: 'mic',
+        AVEncoderAudioQualityKeyIOS: 'medium',
+        AVNumberOfChannelsKeyIOS: 1,
+        AVFormatIDKeyIOS: 'aac',
+      };
+
+      const uri = await this.audioRecorderPlayer.startRecorder(path, audioSet);
       
       this.audioRecorderPlayer.addRecordBackListener((e) => {
         this.currentRecordTime = e.currentPosition;

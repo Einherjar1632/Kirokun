@@ -1,25 +1,151 @@
 import { Recording, Speaker, TranscriptionSegment } from '../types';
+import { GEMINI_API_KEY } from '@env';
+import RNFS from 'react-native-fs';
 
 export class TranscriptionService {
-  private static GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'; // 実際のAPIキーに置き換えてください
+  private static API_KEY = GEMINI_API_KEY;
+  private static API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
   static async transcribeAudio(audioFilePath: string): Promise<{ 
     transcription: string; 
     speakers: Speaker[] 
   }> {
     try {
-      // 実際のGemini API実装はここに追加
-      // 現在はモックデータを返します
-      const mockTranscription = await this.mockTranscription();
+      console.log('=== 文字起こし開始 ===');
+      console.log('APIキー確認:', this.API_KEY ? 'あり' : 'なし');
+      console.log('音声ファイルパス:', audioFilePath);
       
-      return {
-        transcription: mockTranscription.text,
-        speakers: mockTranscription.speakers,
+      // 音声ファイルの存在確認
+      const fileExists = await RNFS.exists(audioFilePath);
+      console.log('ファイル存在:', fileExists);
+      
+      if (!fileExists) {
+        throw new Error('音声ファイルが見つかりません');
+      }
+
+      // ファイルサイズチェック
+      const fileStat = await RNFS.stat(audioFilePath);
+      console.log('ファイルサイズ:', fileStat.size, 'bytes');
+      
+      if (fileStat.size === 0) {
+        throw new Error('音声ファイルが空です。録音が正常に行われていない可能性があります。');
+      }
+
+      // 音声ファイルをBase64にエンコード
+      const base64Audio = await RNFS.readFile(audioFilePath, 'base64');
+      console.log('Base64音声データサイズ:', base64Audio.length);
+
+      // Gemini API リクエスト
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              {
+                text: "この音声ファイルを文字起こししてください。話者が複数いる場合は「話者1:」「話者2:」のように識別してください。日本語で応答してください。"
+              },
+              {
+                inline_data: {
+                  mime_type: 'audio/mp4',
+                  data: base64Audio
+                }
+              }
+            ]
+          }
+        ]
       };
+
+      console.log('Gemini APIリクエスト送信中...');
+      const response = await fetch(`${this.API_URL}?key=${this.API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('API レスポンス ステータス:', response.status);
+      const responseData = await response.json();
+      console.log('API レスポンス:', JSON.stringify(responseData, null, 2));
+
+      if (!response.ok) {
+        throw new Error(`Gemini API エラー: ${response.status} - ${JSON.stringify(responseData)}`);
+      }
+
+      if (!responseData.candidates || !responseData.candidates[0] || !responseData.candidates[0].content) {
+        throw new Error('音声データがないため、文字起こしを行うことができません');
+      }
+
+      const transcriptionText = responseData.candidates[0].content.parts[0].text;
+      console.log('文字起こし結果:', transcriptionText);
+
+      const { text, speakers } = this.parseTranscription(transcriptionText);
+
+      console.log('=== Gemini API 文字起こし完了 ===');
+      return { transcription: text, speakers };
     } catch (error) {
-      console.error('文字起こしエラー:', error);
+      console.error('=== 文字起こしエラー ===');
+      console.error('エラー詳細:', error);
+      console.error('エラーメッセージ:', error.message);
+      
       throw error;
     }
+  }
+
+  private static parseTranscription(text: string): {
+    text: string;
+    speakers: Speaker[];
+  } {
+    const speakers: Speaker[] = [];
+    const speakerMap = new Map<string, Speaker>();
+    
+    // 話者パターンを検出（例: "話者1:", "営業担当:", など）
+    const lines = text.split('\n');
+    let currentTime = 0;
+    
+    lines.forEach((line) => {
+      const speakerMatch = line.match(/^(.+?)[:：]\s*(.+)$/);
+      if (speakerMatch) {
+        const speakerName = speakerMatch[1].trim();
+        const content = speakerMatch[2].trim();
+        
+        if (!speakerMap.has(speakerName)) {
+          const speaker: Speaker = {
+            id: `speaker_${speakerMap.size + 1}`,
+            name: speakerName,
+            segments: []
+          };
+          speakerMap.set(speakerName, speaker);
+          speakers.push(speaker);
+        }
+        
+        const speaker = speakerMap.get(speakerName)!;
+        const segment: TranscriptionSegment = {
+          text: content,
+          startTime: currentTime,
+          endTime: currentTime + 5000, // 仮の時間（5秒ずつ）
+          speakerId: speaker.id
+        };
+        
+        speaker.segments.push(segment);
+        currentTime += 5000;
+      }
+    });
+
+    // 話者が識別できなかった場合
+    if (speakers.length === 0) {
+      speakers.push({
+        id: 'speaker_1',
+        name: '話者',
+        segments: [{
+          text: text,
+          startTime: 0,
+          endTime: currentTime || 10000,
+          speakerId: 'speaker_1'
+        }]
+      });
+    }
+
+    return { text, speakers };
   }
 
   private static async mockTranscription(): Promise<{

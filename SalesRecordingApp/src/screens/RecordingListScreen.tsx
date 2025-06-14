@@ -84,7 +84,8 @@ export const RecordingListScreen: React.FC<Props> = ({ onSelectRecording }) => {
               await loadRecordings();
               Alert.alert('完了', '文字起こしが完了しました');
             } catch (error) {
-              Alert.alert('エラー', '文字起こしに失敗しました');
+              console.error('文字起こしエラー:', error);
+              Alert.alert('エラー', `文字起こしに失敗しました: ${error.message}`);
             }
           },
         },
