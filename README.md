@@ -26,13 +26,15 @@ A React Native app for unified management of business meeting audio recording, t
 
 ### 📂 Recording Management
 - **Recording list display** manages past recordings in chronological order
+- **Audio playback control** play, pause, and seek through recordings with visual slider
 - **Detailed view functionality** integrated display of transcription, summary, and memos
 - **Sharing functionality** share content with other apps or via email
+- **Delete functionality** remove unwanted recordings
 
 ## 🛠️ Tech Stack
 
 - **Framework**: React Native 0.74.0
-- **Language**: TypeScript
+- **Language**: TypeScript 5.0.4
 - **AI API**: Google Gemini 1.5 Flash
 - **Audio Processing**: react-native-audio-recorder-player
 - **Data Storage**: @react-native-async-storage/async-storage
@@ -41,7 +43,8 @@ A React Native app for unified management of business meeting audio recording, t
 - **Sharing Functionality**: react-native-share
 - **UI Components**: @react-native-community/slider
 - **Environment Variables**: react-native-dotenv
-- **Design**: Modern warm color theme (matching app icon colors)
+- **Type Safety**: Complete TypeScript type definitions with @types packages
+- **Design**: Modern warm color theme (Coral Pink, Warm Brown, Cream palette)
 
 ## 🚀 Setup
 
@@ -118,26 +121,27 @@ npm run android
 ### 4. Recording Management and Sharing
 1. Check past recordings in the "Recording List" tab
 2. Tap a recording to display the detail screen
-3. Check audio playback, transcription content, and summary
-4. Use the "Share" button to share content with other apps or via email
-5. Delete unwanted recordings using the "Delete" button
+3. **Audio playback**: Use play/pause controls and slider to navigate through recordings
+4. **View content**: Check transcription with speaker identification and summary
+5. **Share recordings**: Use the "Share" button to export content with title, memo, transcription, and summary
+6. **Delete recordings**: Remove unwanted recordings using the "Delete" button
 
 ## 📁 Project Structure
 
 ```
 src/
-├── components/          # Reusable UI components
+├── components/          # Reusable UI components (currently empty)
 ├── screens/            # Screen components
-│   ├── RecordingScreen.tsx          # Recording screen
-│   ├── RecordingListScreen.tsx      # Recording list screen
-│   └── RecordingDetailScreen.tsx    # Recording detail screen
+│   ├── RecordingScreen.tsx          # Recording screen with timer and controls
+│   ├── RecordingListScreen.tsx      # Recording list with playback controls
+│   └── RecordingDetailScreen.tsx    # Recording detail with full functionality
 ├── services/           # Business logic & API integration
-│   ├── RecordingService.ts          # Recording-related services
-│   ├── StorageService.ts            # Data storage service
-│   └── TranscriptionService.ts      # Transcription service
+│   ├── RecordingService.ts          # Audio recording and playback services
+│   ├── StorageService.ts            # AsyncStorage data persistence
+│   └── TranscriptionService.ts      # Gemini AI transcription and summarization
 ├── types/              # TypeScript type definitions
-│   └── index.ts                     # Application common types
-└── utils/              # Utility functions
+│   └── index.ts                     # Recording, Speaker, and app-wide types
+└── utils/              # Utility functions (currently empty)
 ```
 
 ## ⚙️ Development & Debugging
@@ -165,8 +169,15 @@ npx react-native start --reset-cache
 ## 🔧 Settings & Customization
 
 ### Design Theme
-- Adopts a warm color theme matching the app icon colors
-- Design based on Coral Pink (`#FFB199`), Warm Brown (`#8B5A3C`), and Cream (`#F5F0E8`)
+- **Color Palette**: Warm theme matching the app icon design
+  - Primary: Coral Pink (`#FFB199`) - accent colors and active states
+  - Secondary: Warm Brown (`#8B5A3C`) - text and main elements
+  - Background: Cream (`#F5F0E8`) - main background
+  - Cards: Beige (`#F9F3E8`) - card backgrounds
+  - Borders: Light Brown (`#E6D5C3`) - borders and dividers
+- **Typography**: Enhanced with proper font weights and letter spacing
+- **Shadows**: Consistent elevation system for depth
+- **Modern UI**: Rounded corners, proper spacing, and visual hierarchy
 
 ### Gemini API Settings
 - API settings can be customized in `src/services/TranscriptionService.ts`
@@ -186,4 +197,4 @@ If you have bug reports or feature requests, please create an Issue.
 ---
 
 **Developer**: Einherjar1632  
-**Last Updated**: June 14, 2025
+**Last Updated**: June 15, 2025
