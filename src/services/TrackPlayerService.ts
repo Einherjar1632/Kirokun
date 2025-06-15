@@ -234,7 +234,7 @@ export class TrackPlayerService {
 
   async setPlaybackRate(rate: number): Promise<void> {
     try {
-      this.playbackRate = Math.max(0.2, Math.min(2.0, rate));
+      this.playbackRate = Math.max(1.0, Math.min(2.0, rate));
       await TrackPlayer.setRate(this.playbackRate);
       console.log('TrackPlayer再生速度設定:', this.playbackRate);
     } catch (error) {

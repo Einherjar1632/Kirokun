@@ -50,7 +50,12 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
 
   const handleSpeedChange = async () => {
     try {
-      const newRate = playbackRate >= 2.0 ? 0.2 : playbackRate + 0.2;
+      // 速度を配列で管理して精度問題を回避
+      const speeds = [1.0, 1.2, 1.4, 1.6, 1.8, 2.0];
+      const currentIndex = speeds.findIndex(speed => Math.abs(speed - playbackRate) < 0.01);
+      const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % speeds.length : 0;
+      const newRate = speeds[nextIndex];
+      
       await recordingService.setPlaybackRate(newRate);
       setPlaybackRate(newRate);
     } catch (error) {
