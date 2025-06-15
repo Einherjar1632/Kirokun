@@ -308,6 +308,8 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
               recordingService={recordingService}
               isPlaying={isPlaying && recordingService.getIsPlaying()}
               onPlayPause={handlePlayRecording}
+              audioFilePath={currentRecording.filePath || currentRecording.uri}
+              audioTitle={currentRecording.title}
             />
             <TouchableOpacity
               style={[styles.actionButton, styles.stopButton]}

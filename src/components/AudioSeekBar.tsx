@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import Slider from '@react-native-community/slider';
+import Share from 'react-native-share';
 import {RecordingService} from '../services/RecordingService';
 
 interface AudioSeekBarProps {
@@ -13,6 +14,8 @@ interface AudioSeekBarProps {
   recordingService: RecordingService;
   isPlaying: boolean;
   onPlayPause: () => void;
+  audioFilePath?: string;
+  audioTitle?: string;
 }
 
 export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
@@ -25,6 +28,8 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
   recordingService,
   isPlaying,
   onPlayPause,
+  audioFilePath,
+  audioTitle,
 }) => {
   const [playbackRate, setPlaybackRate] = useState(1.0);
 
@@ -60,6 +65,25 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
       setPlaybackRate(newRate);
     } catch (error) {
       console.error('再生速度変更エラー:', error);
+    }
+  };
+
+  const handleShareAudio = async () => {
+    if (!audioFilePath) {
+      Alert.alert('エラー', '音声ファイルが見つかりません');
+      return;
+    }
+
+    try {
+      const shareOptions = {
+        title: audioTitle || '録音ファイル',
+        url: audioFilePath,
+        type: 'audio/*',
+      };
+
+      await Share.open(shareOptions);
+    } catch (error) {
+      console.log('音声共有がキャンセルされました');
     }
   };
   return (
@@ -119,6 +143,14 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
           activeOpacity={0.8}
         >
           <Text style={styles.speedButtonText}>{playbackRate.toFixed(1)}×</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.shareButton} 
+          onPress={handleShareAudio}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.shareButtonText}>⇡</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -184,6 +216,19 @@ const styles = StyleSheet.create({
   speedButtonText: {
     fontSize: 11,
     color: '#4A2F2A',
+    fontWeight: 'bold',
+  },
+  shareButton: {
+    width: 44,
+    height: 44,
+    backgroundColor: '#B5845A',
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareButtonText: {
+    fontSize: 18,
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
 });

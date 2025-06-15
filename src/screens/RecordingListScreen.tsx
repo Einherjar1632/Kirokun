@@ -244,6 +244,8 @@ ${recording.transcription}
             recordingService={recordingService}
             isPlaying={playingRecordingId === item.id && recordingService.getIsPlaying()}
             onPlayPause={() => handlePlayRecording(item)}
+            audioFilePath={item.filePath || item.uri}
+            audioTitle={item.title}
           />
           <TouchableOpacity
             style={[styles.actionButton, styles.stopButton]}

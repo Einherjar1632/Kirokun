@@ -20,7 +20,8 @@
     "react-native-fs": "^2.20.0",
     "react-native-permissions": "^5.4.1",
     "react-native-share": "^12.0.11",
-    "react-native-track-player": "^4.1.1"
+    "react-native-track-player": "^4.1.1",
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
