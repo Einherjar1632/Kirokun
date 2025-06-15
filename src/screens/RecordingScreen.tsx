@@ -69,7 +69,7 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({ recordingServi
     try {
       const recording: Recording = {
         id: Date.now().toString(),
-        title: recordingTitle || `録音 ${new Date().toLocaleDateString()}`,
+        title: recordingTitle || `録音 ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
         memo: recordingMemo,
         filePath: currentRecordingPath,
         duration: recordTime,
