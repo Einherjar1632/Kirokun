@@ -59,7 +59,8 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
   };
   return (
     <View style={styles.container}>
-      <View style={styles.timeContainer}>
+      {/* シークバーと時間表示 */}
+      <View style={styles.seekBarContainer}>
         <Text style={styles.timeText}>
           {recordingService.formatTime(currentPosition)}
         </Text>
@@ -79,21 +80,40 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
         </Text>
       </View>
       
+      {/* コントロールボタン */}
       <View style={styles.controlsContainer}>
-        <TouchableOpacity style={styles.controlButton} onPress={handleRewind}>
+        <TouchableOpacity 
+          style={styles.controlButton} 
+          onPress={handleRewind}
+          activeOpacity={0.8}
+        >
           <Text style={styles.controlButtonText}>⏪</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.playButton} onPress={onPlayPause}>
-          <Text style={styles.playButtonText}>{isPlaying ? '⏸️' : '▶️'}</Text>
+        <TouchableOpacity 
+          style={[styles.controlButton, styles.playButton]} 
+          onPress={onPlayPause}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.playButtonText}>
+            {isPlaying ? '■' : '▶'}
+          </Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.controlButton} onPress={handleFastForward}>
+        <TouchableOpacity 
+          style={styles.controlButton} 
+          onPress={handleFastForward}
+          activeOpacity={0.8}
+        >
           <Text style={styles.controlButtonText}>⏩</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.speedButton} onPress={handleSpeedChange}>
-          <Text style={styles.speedButtonText}>{playbackRate.toFixed(1)}x</Text>
+        <TouchableOpacity 
+          style={styles.speedButton} 
+          onPress={handleSpeedChange}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.speedButtonText}>{playbackRate.toFixed(1)}×</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -102,61 +122,62 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 10,
-    marginTop: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
   },
-  timeContainer: {
+  seekBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 15,
   },
   slider: {
     flex: 1,
     height: 40,
+    marginHorizontal: 10,
   },
   timeText: {
     fontSize: 12,
     color: '#4A2F2A',
     minWidth: 45,
+    textAlign: 'center',
   },
   controlsContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    marginTop: 10,
-    gap: 15,
   },
   controlButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     backgroundColor: '#FFB199',
-    borderRadius: 20,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  playButton: {
+    backgroundColor: '#FF8C69',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   controlButtonText: {
     fontSize: 16,
-  },
-  playButton: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#FF8C69',
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: '#FFFFFF',
   },
   playButtonText: {
     fontSize: 20,
+    color: '#FFFFFF',
   },
   speedButton: {
-    width: 45,
-    height: 40,
+    width: 50,
+    height: 44,
     backgroundColor: '#E6D5C3',
-    borderRadius: 20,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
   speedButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#4A2F2A',
     fontWeight: 'bold',
   },

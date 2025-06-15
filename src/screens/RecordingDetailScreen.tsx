@@ -298,24 +298,22 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
 
         {isPlaying && (
           <View style={styles.playerContainer}>
-            <View style={styles.playerControls}>
-              <AudioSeekBar
-                currentPosition={currentPosition}
-                duration={duration}
-                isSliding={isSliding}
-                onSeekStart={handleSeekStart}
-                onSeekChange={handleSeekChange}
-                onSeekComplete={handleSeekComplete}
-                recordingService={recordingService}
-                isPlaying={isPlaying && recordingService.getIsPlaying()}
-                onPlayPause={handlePlayRecording}
-              />
-            </View>
+            <AudioSeekBar
+              currentPosition={currentPosition}
+              duration={duration}
+              isSliding={isSliding}
+              onSeekStart={handleSeekStart}
+              onSeekChange={handleSeekChange}
+              onSeekComplete={handleSeekComplete}
+              recordingService={recordingService}
+              isPlaying={isPlaying && recordingService.getIsPlaying()}
+              onPlayPause={handlePlayRecording}
+            />
             <TouchableOpacity
               style={[styles.actionButton, styles.stopButton]}
               onPress={handleStopPlayback}
             >
-              <Text style={styles.actionButtonText}>停止</Text>
+              <Text style={styles.actionButtonText}>閉じる</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -447,6 +445,7 @@ const styles = StyleSheet.create({
     color: '#F9F3E8',
     fontSize: 13,
     fontWeight: '600',
+    textAlign: 'center',
   },
   content: {
     flex: 1,

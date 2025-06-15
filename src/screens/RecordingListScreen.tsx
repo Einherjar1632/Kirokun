@@ -234,24 +234,22 @@ ${recording.transcription}
 
       {playingRecordingId === item.id ? (
         <View style={styles.playerContainer}>
-          <View style={styles.playerControls}>
-            <AudioSeekBar
-              currentPosition={currentPosition}
-              duration={duration}
-              isSliding={isSliding}
-              onSeekStart={handleSeekStart}
-              onSeekChange={handleSeekChange}
-              onSeekComplete={handleSeekComplete}
-              recordingService={recordingService}
-              isPlaying={playingRecordingId === item.id && recordingService.getIsPlaying()}
-              onPlayPause={() => handlePlayRecording(item)}
-            />
-          </View>
+          <AudioSeekBar
+            currentPosition={currentPosition}
+            duration={duration}
+            isSliding={isSliding}
+            onSeekStart={handleSeekStart}
+            onSeekChange={handleSeekChange}
+            onSeekComplete={handleSeekComplete}
+            recordingService={recordingService}
+            isPlaying={playingRecordingId === item.id && recordingService.getIsPlaying()}
+            onPlayPause={() => handlePlayRecording(item)}
+          />
           <TouchableOpacity
             style={[styles.actionButton, styles.stopButton]}
             onPress={handleStopPlayback}
           >
-            <Text style={styles.actionButtonText}>停止</Text>
+            <Text style={styles.actionButtonText}>閉じる</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -437,6 +435,7 @@ const styles = StyleSheet.create({
     color: '#F9F3E8',
     fontSize: 13,
     fontWeight: '600',
+    textAlign: 'center',
   },
   playerContainer: {
     backgroundColor: '#FFFFFF',
