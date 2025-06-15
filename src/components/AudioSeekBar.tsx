@@ -185,8 +185,9 @@ const styles = StyleSheet.create({
   },
   controlsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 12,
   },
   controlButton: {
     width: 44,
