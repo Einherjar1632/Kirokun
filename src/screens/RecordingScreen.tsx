@@ -7,6 +7,9 @@ import {
   Alert,
   TextInput,
   Modal,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import { RecordingService } from '../services/RecordingService';
 import { StorageService } from '../services/StorageService';
@@ -206,42 +209,54 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({ recordingServi
         transparent
         animationType="slide"
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>録音を保存</Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder="タイトル（省略可）"
-              value={recordingTitle}
-              onChangeText={setRecordingTitle}
-            />
-            
-            <TextInput
-              style={[styles.input, styles.memoInput]}
-              placeholder="メモ（省略可）"
-              value={recordingMemo}
-              onChangeText={setRecordingMemo}
-              multiline
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={resetRecording}
-              >
-                <Text style={styles.cancelButtonText}>キャンセル</Text>
-              </TouchableOpacity>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>録音を保存</Text>
               
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={handleSaveRecording}
-              >
-                <Text style={styles.saveButtonText}>保存</Text>
-              </TouchableOpacity>
+              <TextInput
+                style={styles.input}
+                placeholder="タイトル（省略可）"
+                value={recordingTitle}
+                onChangeText={setRecordingTitle}
+                returnKeyType="next"
+                blurOnSubmit={false}
+              />
+              
+              <TextInput
+                style={[styles.input, styles.memoInput]}
+                placeholder="メモ（省略可）"
+                value={recordingMemo}
+                onChangeText={setRecordingMemo}
+                multiline
+                returnKeyType="done"
+                blurOnSubmit={true}
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={resetRecording}
+                >
+                  <Text style={styles.cancelButtonText}>キャンセル</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.saveButton]}
+                  onPress={handleSaveRecording}
+                >
+                  <Text style={styles.saveButtonText}>保存</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -331,6 +346,9 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(139, 90, 60, 0.6)',
+  },
+  scrollContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
