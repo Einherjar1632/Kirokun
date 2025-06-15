@@ -92,7 +92,7 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
           onPress={handleRewind}
           activeOpacity={0.8}
         >
-          <Text style={styles.controlButtonText}>⏪</Text>
+          <Text style={styles.controlButtonText}>-5s</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -110,7 +110,7 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
           onPress={handleFastForward}
           activeOpacity={0.8}
         >
-          <Text style={styles.controlButtonText}>⏩</Text>
+          <Text style={styles.controlButtonText}>+5s</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
