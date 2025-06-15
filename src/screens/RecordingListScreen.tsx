@@ -243,6 +243,8 @@ ${recording.transcription}
               onSeekChange={handleSeekChange}
               onSeekComplete={handleSeekComplete}
               recordingService={recordingService}
+              isPlaying={playingRecordingId === item.id && recordingService.getIsPlaying()}
+              onPlayPause={() => handlePlayRecording(item)}
             />
           </View>
           <TouchableOpacity

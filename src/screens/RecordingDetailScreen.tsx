@@ -307,6 +307,8 @@ ${currentRecording.summary ? `\n\n要約:\n${currentRecording.summary}` : ''}
                 onSeekChange={handleSeekChange}
                 onSeekComplete={handleSeekComplete}
                 recordingService={recordingService}
+                isPlaying={isPlaying && recordingService.getIsPlaying()}
+                onPlayPause={handlePlayRecording}
               />
             </View>
             <TouchableOpacity

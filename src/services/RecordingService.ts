@@ -2,18 +2,18 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { Platform, PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Recording, RecordingStatus } from '../types';
+import { TrackPlayerService } from './TrackPlayerService';
 
 export class RecordingService {
   private audioRecorderPlayer: AudioRecorderPlayer;
+  private trackPlayerService: TrackPlayerService;
   private currentRecordTime: number = 0;
   private onRecordUpdate?: (time: number) => void;
-  private onPlayUpdate?: (currentPosition: number, duration: number) => void;
   private isPlaying: boolean = false;
-  private hasStartedPlayback: boolean = false;
-  private currentPlayPath: string = '';
 
   constructor() {
     this.audioRecorderPlayer = new AudioRecorderPlayer();
+    this.trackPlayerService = TrackPlayerService.getInstance();
   }
 
   async requestPermissions(): Promise<boolean> {
@@ -150,9 +150,7 @@ export class RecordingService {
         await this.stopPlayback();
       }
 
-      this.onPlayUpdate = onUpdate;
       this.isPlaying = true;
-      this.hasStartedPlayback = true;
       
       // ファイルパスの確認とフォーマット
       let playPath = uri;
@@ -161,23 +159,10 @@ export class RecordingService {
         playPath = Platform.OS === 'ios' ? uri : `file://${uri}`;
       }
 
-      this.currentPlayPath = playPath;
-      await this.audioRecorderPlayer.startPlayer(playPath);
-      
-      this.audioRecorderPlayer.addPlayBackListener((e) => {
-        if (this.onPlayUpdate && this.hasStartedPlayback) {
-          this.onPlayUpdate(e.currentPosition, e.duration);
-        }
-        
-        if (e.currentPosition >= e.duration && e.duration > 0) {
-          this.isPlaying = false; // 再生終了時はisPlayingのみfalseに
-        }
-      });
+      await this.trackPlayerService.startPlayback(playPath, onUpdate);
     } catch (error) {
       console.error('再生開始エラー:', error);
       this.isPlaying = false;
-      this.hasStartedPlayback = false;
-      this.currentPlayPath = '';
       throw error;
     }
   }
@@ -185,17 +170,7 @@ export class RecordingService {
   async stopPlayback(): Promise<void> {
     try {
       this.isPlaying = false;
-      this.hasStartedPlayback = false;
-      this.currentPlayPath = '';
-      
-      try {
-        await this.audioRecorderPlayer.stopPlayer();
-        this.audioRecorderPlayer.removePlayBackListener();
-      } catch (stopError) {
-        // プレイヤーが既に停止している場合はエラーを無視
-        console.log('プレイヤーは既に停止済み');
-      }
-      
+      await this.trackPlayerService.stopPlayback();
       console.log('再生停止');
     } catch (error) {
       console.error('再生停止エラー:', error);
@@ -205,7 +180,7 @@ export class RecordingService {
 
   async pausePlayback(): Promise<void> {
     try {
-      await this.audioRecorderPlayer.pausePlayer();
+      await this.trackPlayerService.pausePlayback();
       this.isPlaying = false;
       console.log('再生一時停止');
     } catch (error) {
@@ -216,7 +191,7 @@ export class RecordingService {
 
   async resumePlayback(): Promise<void> {
     try {
-      await this.audioRecorderPlayer.resumePlayer();
+      await this.trackPlayerService.resumePlayback();
       this.isPlaying = true;
       console.log('再生再開');
     } catch (error) {
@@ -227,41 +202,10 @@ export class RecordingService {
 
   async seekToTime(position: number): Promise<void> {
     try {
-      if (!this.hasStartedPlayback || !this.currentPlayPath) {
-        console.warn('再生が開始されていないためシークできません');
-        return;
-      }
-      
-      // 位置を有効な範囲に制限
-      const seekPosition = Math.max(0, position);
-      
-      try {
-        // 再生が終了している場合は、新しくプレイヤーを開始
-        if (!this.isPlaying) {
-          this.isPlaying = true;
-          await this.audioRecorderPlayer.startPlayer(this.currentPlayPath);
-        }
-        
-        await this.audioRecorderPlayer.seekToPlayer(seekPosition);
-        console.log('シーク成功:', seekPosition);
-      } catch (seekError) {
-        // シークに失敗した場合は、プレイヤーを再開始してからシーク
-        console.log('シーク失敗、プレイヤーを再開始:', seekError instanceof Error ? seekError.message : 'Unknown error');
-        try {
-          await this.audioRecorderPlayer.stopPlayer();
-          this.isPlaying = true;
-          await this.audioRecorderPlayer.startPlayer(this.currentPlayPath);
-          await this.audioRecorderPlayer.seekToPlayer(seekPosition);
-          console.log('再開始後のシーク成功:', seekPosition);
-        } catch (restartError) {
-          console.error('プレイヤー再開始エラー:', restartError);
-          this.isPlaying = false;
-          throw restartError;
-        }
-      }
+      await this.trackPlayerService.seekToTime(position);
+      console.log('シーク成功:', position);
     } catch (error) {
       console.error('シークエラー:', error);
-      this.isPlaying = false;
       throw error;
     }
   }
@@ -271,9 +215,28 @@ export class RecordingService {
   }
 
   formatTime(milliseconds: number): string {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return this.trackPlayerService.formatTime(milliseconds);
+  }
+
+  async setPlaybackRate(rate: number): Promise<void> {
+    try {
+      await this.trackPlayerService.setPlaybackRate(rate);
+    } catch (error) {
+      console.error('再生速度設定エラー:', error);
+      throw error;
+    }
+  }
+
+  getPlaybackRate(): number {
+    return this.trackPlayerService.getPlaybackRate();
+  }
+
+  async seekRelative(offsetSeconds: number): Promise<void> {
+    try {
+      await this.trackPlayerService.seekRelative(offsetSeconds);
+    } catch (error) {
+      console.error('相対シークエラー:', error);
+      throw error;
+    }
   }
 }
