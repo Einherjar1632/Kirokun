@@ -198,9 +198,6 @@ const styles = StyleSheet.create({
   },
   playButton: {
     backgroundColor: '#FF8C69',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
   },
   controlButtonText: {
     fontSize: 16,
@@ -211,7 +208,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   speedButton: {
-    width: 50,
+    width: 44,
     height: 44,
     backgroundColor: '#E6D5C3',
     borderRadius: 22,
