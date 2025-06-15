@@ -124,9 +124,14 @@ export const AudioSeekBar: React.FC<AudioSeekBarProps> = ({
           onPress={onPlayPause}
           activeOpacity={0.8}
         >
-          <Text style={styles.playButtonText}>
-            {isPlaying ? '■' : '▶'}
-          </Text>
+          {isPlaying ? (
+            <View style={styles.pauseIcon}>
+              <View style={styles.pauseLine} />
+              <View style={styles.pauseLine} />
+            </View>
+          ) : (
+            <Text style={styles.playButtonText}>▶</Text>
+          )}
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -230,5 +235,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },
+  pauseIcon: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 3,
+  },
+  pauseLine: {
+    width: 3,
+    height: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 1.5,
   },
 });
