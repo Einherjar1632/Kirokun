@@ -13,6 +13,7 @@ export class TrackPlayerService {
   private onProgressUpdate?: (currentPosition: number, duration: number) => void;
   private currentTrackId: string = '';
   private playbackRate: number = 1.0;
+  private eventListeners: any[] = [];
 
   private constructor() {}
 
@@ -56,6 +57,9 @@ export class TrackPlayerService {
         progressUpdateEventInterval: 100, // 100ms間隔で更新
       });
 
+      // イベントリスナーを設定して警告を消す
+      this.setupEventListeners();
+
       this.isPlayerInitialized = true;
       console.log('TrackPlayer初期化完了');
     } catch (error) {
@@ -67,6 +71,39 @@ export class TrackPlayerService {
       console.error('TrackPlayer初期化エラー:', error);
       throw error;
     }
+  }
+
+  private setupEventListeners(): void {
+    // 既存のリスナーをクリア
+    this.removeEventListeners();
+
+    // 必要なイベントリスナーを設定
+    const stateListener = TrackPlayer.addEventListener(Event.PlaybackState, () => {
+      // 状態変更をログに記録（必要に応じて）
+    });
+
+    const trackChangeListener = TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, () => {
+      // トラック変更をログに記録（必要に応じて）
+    });
+
+    const progressListener = TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, () => {
+      // プログレス更新をログに記録（必要に応じて）
+    });
+
+    const playWhenReadyListener = TrackPlayer.addEventListener(Event.PlaybackPlayWhenReadyChanged, () => {
+      // PlayWhenReady変更をログに記録（必要に応じて）
+    });
+
+    this.eventListeners = [stateListener, trackChangeListener, progressListener, playWhenReadyListener];
+  }
+
+  private removeEventListeners(): void {
+    this.eventListeners.forEach(listener => {
+      if (listener && listener.remove) {
+        listener.remove();
+      }
+    });
+    this.eventListeners = [];
   }
 
   async startPlayback(uri: string, onUpdate?: (currentPosition: number, duration: number) => void): Promise<void> {
@@ -230,6 +267,7 @@ export class TrackPlayerService {
   async cleanup(): Promise<void> {
     try {
       this.stopProgressPolling();
+      this.removeEventListeners();
       await TrackPlayer.destroy();
       this.isPlayerInitialized = false;
       console.log('TrackPlayerクリーンアップ完了');
