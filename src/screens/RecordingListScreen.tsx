@@ -7,12 +7,12 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
 import Share from 'react-native-share';
 import { StorageService } from '../services/StorageService';
 import { TranscriptionService } from '../services/TranscriptionService';
 import { RecordingService } from '../services/RecordingService';
 import { Recording } from '../types';
+import { AudioSeekBar } from '../components/AudioSeekBar';
 
 interface Props {
   onSelectRecording: (recording: Recording) => void;
@@ -235,25 +235,15 @@ ${recording.transcription}
       {playingRecordingId === item.id ? (
         <View style={styles.playerContainer}>
           <View style={styles.playerControls}>
-            <Text style={styles.timeText}>
-              {recordingService.formatTime(currentPosition)}
-            </Text>
-            <View style={styles.sliderContainer}>
-              <Slider
-                style={styles.slider}
-                value={currentPosition}
-                minimumValue={0}
-                maximumValue={Math.max(duration, 1)}
-                onSlidingStart={handleSeekStart}
-                onValueChange={handleSeekChange}
-                onSlidingComplete={handleSeekComplete}
-                minimumTrackTintColor="#FFB199"
-                maximumTrackTintColor="#E6D5C3"
-              />
-            </View>
-            <Text style={styles.timeText}>
-              {recordingService.formatTime(duration)}
-            </Text>
+            <AudioSeekBar
+              currentPosition={currentPosition}
+              duration={duration}
+              isSliding={isSliding}
+              onSeekStart={handleSeekStart}
+              onSeekChange={handleSeekChange}
+              onSeekComplete={handleSeekComplete}
+              recordingService={recordingService}
+            />
           </View>
           <TouchableOpacity
             style={[styles.actionButton, styles.stopButton]}
