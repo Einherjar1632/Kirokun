@@ -11,11 +11,13 @@ import {
 import { RecordingScreen } from './src/screens/RecordingScreen';
 import { RecordingListScreen } from './src/screens/RecordingListScreen';
 import { RecordingDetailScreen } from './src/screens/RecordingDetailScreen';
-import { SettingsScreen } from './src/screens/SettingsScreen';
+import { SettingsMenuScreen } from './src/screens/SettingsMenuScreen';
+import { TranscriptionSettingsScreen } from './src/screens/TranscriptionSettingsScreen';
+import { SummarySettingsScreen } from './src/screens/SummarySettingsScreen';
 import { Recording } from './src/types';
 import { RecordingService } from './src/services/RecordingService';
 
-type Screen = 'recording' | 'list' | 'detail' | 'settings';
+type Screen = 'recording' | 'list' | 'detail' | 'settings' | 'transcription-settings' | 'summary-settings';
 
 // グローバルなRecordingServiceインスタンスを作成
 const recordingService = new RecordingService();
@@ -83,7 +85,15 @@ function App(): React.JSX.Element {
           />
         ) : null;
       case 'settings':
-        return <SettingsScreen onBack={() => setCurrentScreen('recording')} />;
+        return <SettingsMenuScreen 
+          onBack={() => setCurrentScreen('recording')}
+          onNavigateToTranscription={() => setCurrentScreen('transcription-settings')}
+          onNavigateToSummary={() => setCurrentScreen('summary-settings')}
+        />;
+      case 'transcription-settings':
+        return <TranscriptionSettingsScreen onBack={() => setCurrentScreen('settings')} />;
+      case 'summary-settings':
+        return <SummarySettingsScreen onBack={() => setCurrentScreen('settings')} />;
       default:
         return <RecordingScreen />;
     }
@@ -105,7 +115,10 @@ function App(): React.JSX.Element {
         </TouchableOpacity>
       </View>
 
-      {currentScreen !== 'detail' && currentScreen !== 'settings' && (
+      {currentScreen !== 'detail' && 
+       currentScreen !== 'settings' && 
+       currentScreen !== 'transcription-settings' && 
+       currentScreen !== 'summary-settings' && (
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[
