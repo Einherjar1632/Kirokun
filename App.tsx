@@ -99,7 +99,9 @@ function App(): React.JSX.Element {
           style={styles.settingsButton}
           onPress={() => setCurrentScreen('settings')}
         >
-          <Text style={styles.settingsIcon}>⚙️</Text>
+          <View style={styles.settingsIconContainer}>
+            <Text style={styles.settingsIcon}>⚙</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -207,11 +209,19 @@ const styles = StyleSheet.create({
   settingsButton: {
     position: 'absolute',
     right: 24,
+    padding: 4,
+  },
+  settingsIconContainer: {
+    backgroundColor: 'rgba(245, 240, 232, 0.2)',
+    borderRadius: 8,
     padding: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 240, 232, 0.3)',
   },
   settingsIcon: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#F5F0E8',
+    fontWeight: '600',
   },
 });
 
