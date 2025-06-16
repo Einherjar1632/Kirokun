@@ -11,10 +11,11 @@ import {
 import { RecordingScreen } from './src/screens/RecordingScreen';
 import { RecordingListScreen } from './src/screens/RecordingListScreen';
 import { RecordingDetailScreen } from './src/screens/RecordingDetailScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
 import { Recording } from './src/types';
 import { RecordingService } from './src/services/RecordingService';
 
-type Screen = 'recording' | 'list' | 'detail';
+type Screen = 'recording' | 'list' | 'detail' | 'settings';
 
 // グローバルなRecordingServiceインスタンスを作成
 const recordingService = new RecordingService();
@@ -81,6 +82,8 @@ function App(): React.JSX.Element {
             recordingService={recordingService}
           />
         ) : null;
+      case 'settings':
+        return <SettingsScreen onBack={() => setCurrentScreen('recording')} />;
       default:
         return <RecordingScreen />;
     }
@@ -92,9 +95,15 @@ function App(): React.JSX.Element {
       
       <View style={styles.header}>
         <Text style={styles.headerTitle}>きろくん</Text>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => setCurrentScreen('settings')}
+        >
+          <Text style={styles.settingsIcon}>⚙️</Text>
+        </TouchableOpacity>
       </View>
 
-      {currentScreen !== 'detail' && (
+      {currentScreen !== 'detail' && currentScreen !== 'settings' && (
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[
@@ -144,7 +153,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#8B5A3C',
     paddingVertical: 20,
     paddingHorizontal: 24,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#8B5A3C',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
@@ -192,6 +203,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  settingsButton: {
+    position: 'absolute',
+    right: 24,
+    padding: 8,
+  },
+  settingsIcon: {
+    fontSize: 20,
+    color: '#F5F0E8',
   },
 });
 
