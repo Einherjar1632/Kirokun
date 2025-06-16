@@ -7,14 +7,18 @@ import {
   StyleSheet,
   StatusBar,
   AppState,
+  Image,
 } from 'react-native';
 import { RecordingScreen } from './src/screens/RecordingScreen';
 import { RecordingListScreen } from './src/screens/RecordingListScreen';
 import { RecordingDetailScreen } from './src/screens/RecordingDetailScreen';
+import { SettingsMenuScreen } from './src/screens/SettingsMenuScreen';
+import { TranscriptionSettingsScreen } from './src/screens/TranscriptionSettingsScreen';
+import { SummarySettingsScreen } from './src/screens/SummarySettingsScreen';
 import { Recording } from './src/types';
 import { RecordingService } from './src/services/RecordingService';
 
-type Screen = 'recording' | 'list' | 'detail';
+type Screen = 'recording' | 'list' | 'detail' | 'settings' | 'transcription-settings' | 'summary-settings';
 
 // グローバルなRecordingServiceインスタンスを作成
 const recordingService = new RecordingService();
@@ -81,6 +85,16 @@ function App(): React.JSX.Element {
             recordingService={recordingService}
           />
         ) : null;
+      case 'settings':
+        return <SettingsMenuScreen 
+          onBack={() => setCurrentScreen('recording')}
+          onNavigateToTranscription={() => setCurrentScreen('transcription-settings')}
+          onNavigateToSummary={() => setCurrentScreen('summary-settings')}
+        />;
+      case 'transcription-settings':
+        return <TranscriptionSettingsScreen onBack={() => setCurrentScreen('settings')} />;
+      case 'summary-settings':
+        return <SummarySettingsScreen onBack={() => setCurrentScreen('settings')} />;
       default:
         return <RecordingScreen />;
     }
@@ -91,10 +105,25 @@ function App(): React.JSX.Element {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>きろくん</Text>
+        <Image 
+          source={require('./src/assets/header-logo.png')}
+          style={styles.headerImage}
+          resizeMode="contain"
+        />
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => setCurrentScreen('settings')}
+        >
+          <View style={styles.settingsIconContainer}>
+            <Text style={styles.settingsIcon}>⚙</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
-      {currentScreen !== 'detail' && (
+      {currentScreen !== 'detail' && 
+       currentScreen !== 'settings' && 
+       currentScreen !== 'transcription-settings' && 
+       currentScreen !== 'summary-settings' && (
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[
@@ -144,18 +173,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#8B5A3C',
     paddingVertical: 20,
     paddingHorizontal: 24,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#8B5A3C',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#F5F0E8',
-    letterSpacing: 0.5,
+  headerImage: {
+    height: 72,
+    width: 280,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -192,6 +221,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  settingsButton: {
+    position: 'absolute',
+    right: 24,
+    padding: 4,
+  },
+  settingsIconContainer: {
+    backgroundColor: 'rgba(245, 240, 232, 0.2)',
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 240, 232, 0.3)',
+  },
+  settingsIcon: {
+    fontSize: 18,
+    color: '#F5F0E8',
+    fontWeight: '600',
   },
 });
 
