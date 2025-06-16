@@ -7,6 +7,7 @@ import {
   StyleSheet,
   StatusBar,
   AppState,
+  Image,
 } from 'react-native';
 import { RecordingScreen } from './src/screens/RecordingScreen';
 import { RecordingListScreen } from './src/screens/RecordingListScreen';
@@ -104,7 +105,11 @@ function App(): React.JSX.Element {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>きろくん</Text>
+        <Image 
+          source={require('./src/assets/header-logo.png')}
+          style={styles.headerImage}
+          resizeMode="contain"
+        />
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => setCurrentScreen('settings')}
@@ -177,11 +182,9 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 8,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#F5F0E8',
-    letterSpacing: 0.5,
+  headerImage: {
+    height: 72,
+    width: 280,
   },
   tabContainer: {
     flexDirection: 'row',

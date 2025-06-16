@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ interface TranscriptionSettingsScreenProps {
 export const TranscriptionSettingsScreen: React.FC<TranscriptionSettingsScreenProps> = ({ onBack }) => {
   const [transcriptionPrompt, setTranscriptionPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     loadSettings();
@@ -66,6 +67,7 @@ export const TranscriptionSettingsScreen: React.FC<TranscriptionSettingsScreenPr
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <ScrollView 
+        ref={scrollViewRef}
         style={styles.content} 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -93,6 +95,11 @@ export const TranscriptionSettingsScreen: React.FC<TranscriptionSettingsScreenPr
             placeholderTextColor="#999"
             textAlignVertical="top"
             scrollEnabled={true}
+            onFocus={() => {
+              setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              }, 100);
+            }}
           />
         </View>
 
