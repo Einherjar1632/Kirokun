@@ -11,12 +11,14 @@ interface SettingsMenuScreenProps {
   onBack: () => void;
   onNavigateToTranscription: () => void;
   onNavigateToSummary: () => void;
+  onNavigateToVocabulary: () => void;
 }
 
 export const SettingsMenuScreen: React.FC<SettingsMenuScreenProps> = ({ 
   onBack, 
   onNavigateToTranscription, 
-  onNavigateToSummary 
+  onNavigateToSummary,
+  onNavigateToVocabulary 
 }) => {
   return (
     <View style={styles.container}>
@@ -51,6 +53,17 @@ export const SettingsMenuScreen: React.FC<SettingsMenuScreenProps> = ({
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuTitle}>要約設定</Text>
               <Text style={styles.menuDescription}>文字起こしを要約するときのプロンプトを設定</Text>
+            </View>
+            <Text style={styles.menuArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={onNavigateToVocabulary}>
+            <View style={styles.menuIconContainer}>
+              <Text style={styles.menuIcon}>📖</Text>
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuTitle}>単語帳設定</Text>
+              <Text style={styles.menuDescription}>専門用語や固有名詞を登録して認識精度を向上</Text>
             </View>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>

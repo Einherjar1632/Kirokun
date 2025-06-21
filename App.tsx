@@ -15,10 +15,11 @@ import { RecordingDetailScreen } from './src/screens/RecordingDetailScreen';
 import { SettingsMenuScreen } from './src/screens/SettingsMenuScreen';
 import { TranscriptionSettingsScreen } from './src/screens/TranscriptionSettingsScreen';
 import { SummarySettingsScreen } from './src/screens/SummarySettingsScreen';
+import { VocabularySettingsScreen } from './src/screens/VocabularySettingsScreen';
 import { Recording } from './src/types';
 import { RecordingService } from './src/services/RecordingService';
 
-type Screen = 'recording' | 'list' | 'detail' | 'settings' | 'transcription-settings' | 'summary-settings';
+type Screen = 'recording' | 'list' | 'detail' | 'settings' | 'transcription-settings' | 'summary-settings' | 'vocabulary-settings';
 
 // グローバルなRecordingServiceインスタンスを作成
 const recordingService = new RecordingService();
@@ -90,13 +91,16 @@ function App(): React.JSX.Element {
           onBack={() => setCurrentScreen('recording')}
           onNavigateToTranscription={() => setCurrentScreen('transcription-settings')}
           onNavigateToSummary={() => setCurrentScreen('summary-settings')}
+          onNavigateToVocabulary={() => setCurrentScreen('vocabulary-settings')}
         />;
       case 'transcription-settings':
         return <TranscriptionSettingsScreen onBack={() => setCurrentScreen('settings')} />;
       case 'summary-settings':
         return <SummarySettingsScreen onBack={() => setCurrentScreen('settings')} />;
+      case 'vocabulary-settings':
+        return <VocabularySettingsScreen onBack={() => setCurrentScreen('settings')} />;
       default:
-        return <RecordingScreen />;
+        return <RecordingScreen recordingService={recordingService} />;
     }
   };
 
@@ -115,7 +119,7 @@ function App(): React.JSX.Element {
           onPress={() => setCurrentScreen('settings')}
         >
           <View style={styles.settingsIconContainer}>
-            <Text style={styles.settingsIcon}>⚙</Text>
+            <Text style={styles.settingsIcon}>設定</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -123,7 +127,8 @@ function App(): React.JSX.Element {
       {currentScreen !== 'detail' && 
        currentScreen !== 'settings' && 
        currentScreen !== 'transcription-settings' && 
-       currentScreen !== 'summary-settings' && (
+       currentScreen !== 'summary-settings' && 
+       currentScreen !== 'vocabulary-settings' && (
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[

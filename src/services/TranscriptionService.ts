@@ -2,6 +2,7 @@ import { Recording, Speaker, TranscriptionSegment } from '../types';
 import { GEMINI_API_KEY } from '@env';
 import RNFS from 'react-native-fs';
 import { PromptSettingsService } from './PromptSettingsService';
+import { VocabularyService } from './VocabularyService';
 
 export class TranscriptionService {
   private static API_KEY = GEMINI_API_KEY;
@@ -40,13 +41,23 @@ export class TranscriptionService {
       const settings = await PromptSettingsService.getSettings();
       console.log('文字起こし用プロンプト設定を取得しました');
 
+      // 単語帳データを取得して文字起こしプロンプトに追加
+      const vocabularyItems = await VocabularyService.getVocabularyItems();
+      const vocabularyPrompt = VocabularyService.generateVocabularyPrompt(vocabularyItems);
+      const enhancedTranscriptionPrompt = vocabularyPrompt + '\n\n' + settings.transcriptionPrompt;
+      
+      console.log('単語帳アイテム数:', vocabularyItems.length);
+      if (vocabularyItems.length > 0) {
+        console.log('単語帳プロンプトを文字起こしに適用しました');
+      }
+
       // Gemini API リクエスト
       const requestBody = {
         contents: [
           {
             parts: [
               {
-                text: settings.transcriptionPrompt
+                text: enhancedTranscriptionPrompt
               },
               {
                 inline_data: {
@@ -240,8 +251,17 @@ export class TranscriptionService {
       const settings = await PromptSettingsService.getSettings();
       console.log('要約用プロンプト設定を取得しました');
 
-      // プロンプトテンプレートに文字起こしテキストを挿入
-      const promptWithTranscription = settings.summaryPrompt.replace('{transcription}', transcription);
+      // 単語帳データを取得して要約プロンプトに追加
+      const vocabularyItems = await VocabularyService.getVocabularyItems();
+      const vocabularyPrompt = VocabularyService.generateVocabularyPrompt(vocabularyItems);
+      
+      // プロンプトテンプレートに文字起こしテキストを挿入し、単語帳情報も追加
+      let enhancedSummaryPrompt = settings.summaryPrompt.replace('{transcription}', transcription);
+      if (vocabularyItems.length > 0) {
+        enhancedSummaryPrompt = vocabularyPrompt + '\n\n' + enhancedSummaryPrompt;
+        console.log('単語帳プロンプトを要約に適用しました');
+      }
+      const promptWithTranscription = enhancedSummaryPrompt;
 
       // Gemini API リクエスト
       const requestBody = {
