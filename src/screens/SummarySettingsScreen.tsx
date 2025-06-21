@@ -186,14 +186,6 @@ export const SummarySettingsScreen: React.FC<SummarySettingsScreenProps> = ({ on
     }
   };
 
-  const resetToDefault = async () => {
-    try {
-      const defaultSettings = await PromptSettingsService.getDefaultSettings();
-      setSummaryPrompt(defaultSettings.summaryPrompt);
-    } catch (error) {
-      console.error('デフォルト設定の取得エラー:', error);
-    }
-  };
 
   const applyTemplate = (template: SummaryTemplate) => {
     // カスタム用の場合は現在のプロンプトを維持
@@ -289,14 +281,6 @@ export const SummarySettingsScreen: React.FC<SummarySettingsScreenProps> = ({ on
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.resetButton}
-            onPress={resetToDefault}
-            disabled={isLoading}
-          >
-            <Text style={styles.resetButtonText}>システムデフォルト</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
             onPress={saveSettings}
@@ -418,26 +402,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginTop: 20,
     marginBottom: 40,
-    gap: 16,
-  },
-  resetButton: {
-    flex: 1,
-    backgroundColor: '#E6D5C3',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  resetButtonText: {
-    color: '#8B5A3C',
-    fontSize: 16,
-    fontWeight: '600',
   },
   saveButton: {
-    flex: 1,
     backgroundColor: '#FFB199',
     paddingVertical: 16,
     borderRadius: 12,
