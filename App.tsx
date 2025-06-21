@@ -16,6 +16,7 @@ import { SettingsMenuScreen } from './src/screens/SettingsMenuScreen';
 import { TranscriptionSettingsScreen } from './src/screens/TranscriptionSettingsScreen';
 import { SummarySettingsScreen } from './src/screens/SummarySettingsScreen';
 import { VocabularySettingsScreen } from './src/screens/VocabularySettingsScreen';
+import { AdBanner } from './src/components/AdBanner';
 import { Recording } from './src/types';
 import { RecordingService } from './src/services/RecordingService';
 
@@ -165,6 +166,9 @@ function App(): React.JSX.Element {
       <View style={styles.content}>
         {renderScreen()}
       </View>
+      
+      {/* フッター広告 */}
+      <AdBanner />
     </SafeAreaView>
   );
 }
