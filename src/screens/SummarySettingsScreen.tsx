@@ -194,6 +194,15 @@ export const SummarySettingsScreen: React.FC<SummarySettingsScreenProps> = ({ on
     setSummaryPrompt(template.prompt);
   };
 
+  const getCurrentTemplate = (): string | null => {
+    for (const template of SUMMARY_TEMPLATES) {
+      if (summaryPrompt.trim() === template.prompt.trim()) {
+        return template.id;
+      }
+    }
+    return null;
+  };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container}
@@ -221,15 +230,26 @@ export const SummarySettingsScreen: React.FC<SummarySettingsScreenProps> = ({ on
           <Text style={styles.sectionTitle}>テンプレート選択</Text>
           <Text style={styles.sectionSubtitle}>以下のテンプレートから選択するか、自由に編集してください</Text>
           <View style={styles.templateContainer}>
-            {SUMMARY_TEMPLATES.map((template) => (
-              <TouchableOpacity
-                key={template.id}
-                style={styles.templateButton}
-                onPress={() => applyTemplate(template)}
-              >
-                <Text style={styles.templateButtonText}>{template.name}</Text>
-              </TouchableOpacity>
-            ))}
+            {SUMMARY_TEMPLATES.map((template) => {
+              const isSelected = getCurrentTemplate() === template.id;
+              return (
+                <TouchableOpacity
+                  key={template.id}
+                  style={[
+                    styles.templateButton,
+                    isSelected && styles.templateButtonSelected
+                  ]}
+                  onPress={() => applyTemplate(template)}
+                >
+                  <Text style={[
+                    styles.templateButtonText,
+                    isSelected && styles.templateButtonTextSelected
+                  ]}>
+                    {template.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
@@ -349,10 +369,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D4C3B0',
   },
+  templateButtonSelected: {
+    backgroundColor: '#FFB199',
+    borderColor: '#FF9068',
+    shadowColor: '#8B5A3C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
   templateButtonText: {
     color: '#8B5A3C',
     fontSize: 14,
     fontWeight: '600',
+  },
+  templateButtonTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   textInput: {
     backgroundColor: '#FFFFFF',
