@@ -143,6 +143,11 @@ const SUMMARY_TEMPLATES: SummaryTemplate[] = [
 {transcription}
 
 上記の内容をプレゼンテーション要約として整理してください。`
+  },
+  {
+    id: 'custom',
+    name: 'カスタム用',
+    prompt: ''
   }
 ];
 
@@ -191,14 +196,23 @@ export const SummarySettingsScreen: React.FC<SummarySettingsScreenProps> = ({ on
   };
 
   const applyTemplate = (template: SummaryTemplate) => {
+    // カスタム用の場合は現在のプロンプトを維持
+    if (template.id === 'custom') {
+      return;
+    }
     setSummaryPrompt(template.prompt);
   };
 
   const getCurrentTemplate = (): string | null => {
+    // カスタム以外のテンプレートをチェック
     for (const template of SUMMARY_TEMPLATES) {
-      if (summaryPrompt.trim() === template.prompt.trim()) {
+      if (template.id !== 'custom' && summaryPrompt.trim() === template.prompt.trim()) {
         return template.id;
       }
+    }
+    // 何もマッチしない場合で、プロンプトが空でなければカスタム
+    if (summaryPrompt.trim() !== '') {
+      return 'custom';
     }
     return null;
   };
